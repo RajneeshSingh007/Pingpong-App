@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/black"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/imageview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:adjustViewBounds="true"
+            tools:src="@drawable/bg"
+            android:scaleType="fitXY"
+            app:layout_constraintDimensionRatio="h,2:1"
+            android:backgroundTint="@color/black"
+            android:contentDescription="@null"
+            tools:ignore="MissingConstraints" />
+
+        <FrameLayout
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintDimensionRatio="h,2:1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            tools:visibility="visible"
+            android:background="@drawable/slider_img"
+            >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:layout_gravity="bottom"
+                android:paddingVertical="6dp"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:paddingVertical="10dp"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:text="SomeText"
+                    android:textColor="@color/colorPrimaryDark" />
+
+
+                <TextView
+                    android:id="@+id/slug"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center"
+                    android:paddingVertical="4dp"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    android:text="SomeText"
+                    android:textColor="@color/textcolor" />
+            </LinearLayout>
+        </FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</RelativeLayout>

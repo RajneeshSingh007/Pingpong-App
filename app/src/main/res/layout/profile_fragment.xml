@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:ctx=".SettingsActivity">
+<!--    <com.google.android.material.appbar.AppBarLayout-->
+<!--        android:id="@+id/appBar"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:theme="@style/AppTheme.AppBarOverlay">-->
+
+<!--        <androidx.appcompat.widget.Toolbar-->
+<!--            android:id="@+id/toolbar"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="?attr/actionBarSize"-->
+<!--            android:background="@color/black"-->
+<!--            app:popupTheme="@style/AppTheme.PopupOverlay" />-->
+
+<!--    </com.google.android.material.appbar.AppBarLayout>-->
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentStart="true">
+
+            <LinearLayout
+                android:id="@+id/search_root_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:fitsSystemWindows="true">
+
+                <include
+                    android:id="@+id/search_bar"
+                    layout="@layout/toolbar" />
+
+            </LinearLayout>
+
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_marginTop="@dimen/spacing_medium"
+                android:id="@+id/user_iv"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:scaleType="centerCrop"
+                android:tint="@color/grey_400"
+                android:src="@drawable/avatar" />
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_marginTop="@dimen/spacing_large"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textAllCaps="false"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/sbstatus"
+                android:layout_marginTop="@dimen/spacing_medium"
+                android:layout_marginBottom="@dimen/spacing_middle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textAllCaps="false"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:textColor="@color/secondaycolor"
+                android:textSize="15sp"
+                android:gravity="center"
+                android:textStyle="bold" />
+
+
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/spacing_xlarge"
+                android:paddingVertical="10dp"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:tint="@color/textcolor"
+                    android:src="@drawable/outline_person_24"/>
+
+                <TextView
+                    android:id="@+id/profile"
+                    android:textSize="15sp"
+                    android:text="Account"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/textcolor"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:textAlignment="viewStart"/>
+
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginVertical="@dimen/spacing_middle"
+                android:layout_marginHorizontal="@dimen/spacing_xlarge"
+                android:background="@color/grey_400"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/spacing_xlarge"
+                android:paddingVertical="10dp"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:tint="@color/textcolor"
+                    android:src="@drawable/ic_affiliate_marketing"/>
+
+                <TextView
+                    android:id="@+id/affiliate"
+                    android:textSize="15sp"
+                    android:text="Affiliate"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/textcolor"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:textAlignment="viewStart"/>
+
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginVertical="@dimen/spacing_middle"
+                android:layout_marginHorizontal="@dimen/spacing_xlarge"
+                android:background="@color/grey_400"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/spacing_xlarge"
+                android:paddingVertical="10dp"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:tint="@color/textcolor"
+                    android:src="@drawable/ic_baseline_account_balance_wallet_24"/>
+
+                <TextView
+                    android:id="@+id/vipswallet"
+                    android:textSize="15sp"
+                    android:text="Vips Wallet"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/textcolor"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:textAlignment="viewStart"/>
+
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginVertical="@dimen/spacing_middle"
+                android:layout_marginHorizontal="@dimen/spacing_xlarge"
+                android:background="@color/grey_400"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/spacing_xlarge"
+                android:paddingVertical="10dp"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:tint="@color/textcolor"
+                    android:src="@drawable/ludo"/>
+
+                <TextView
+                    android:id="@+id/vipsludo"
+                    android:textSize="15sp"
+                    android:text="Vips Ludo"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/textcolor"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:textAlignment="viewStart"/>
+
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginVertical="@dimen/spacing_middle"
+                android:layout_marginHorizontal="@dimen/spacing_xlarge"
+                android:background="@color/grey_400"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/spacing_xlarge"
+                android:paddingVertical="10dp"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:tint="@color/textcolor"
+                    android:src="@drawable/ic_subscriptions_black_24dp"/>
+
+                <TextView
+                    android:id="@+id/subscription"
+                    android:textSize="15sp"
+                    android:text="Subscription"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/textcolor"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:textAlignment="viewStart"/>
+
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginVertical="@dimen/spacing_middle"
+                android:layout_marginHorizontal="@dimen/spacing_xlarge"
+                android:background="@color/grey_400"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/spacing_xlarge"
+                android:paddingVertical="10dp"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:tint="@color/textcolor"
+                    android:src="@drawable/ic_share_white"/>
+
+                <TextView
+                    android:id="@+id/notify"
+                    android:textSize="15sp"
+                    android:text="Share"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/textcolor"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:textAlignment="viewStart"/>
+
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginVertical="@dimen/spacing_middle"
+                android:layout_marginHorizontal="@dimen/spacing_xlarge"
+                android:background="@color/grey_400"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/spacing_xlarge"
+                android:paddingVertical="10dp"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:tint="@color/textcolor"
+                    android:src="@drawable/ic_settings_white"/>
+
+                <TextView
+                    android:id="@+id/settings"
+                    android:textSize="15sp"
+                    android:text="Settings"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/textcolor"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:textAlignment="viewStart"/>
+
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginVertical="@dimen/spacing_middle"
+                android:layout_marginHorizontal="@dimen/spacing_xlarge"
+                android:background="@color/grey_400"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/spacing_xlarge"
+                android:paddingVertical="10dp"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:tint="@color/textcolor"
+                    android:src="@drawable/ic_info_blue"/>
+
+                <TextView
+                    android:id="@+id/help"
+                    android:textSize="15sp"
+                    android:text="Help"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/textcolor"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:textAlignment="viewStart"/>
+
+
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginVertical="@dimen/spacing_middle"
+                android:layout_marginHorizontal="@dimen/spacing_xlarge"
+                android:background="@color/grey_400"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/spacing_xlarge"
+                android:paddingVertical="10dp"
+                android:layout_marginBottom="12dp"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:tint="@color/textcolor"
+                    android:src="@drawable/outline_lock_24"/>
+
+                <TextView
+                    android:id="@+id/logout"
+                    android:textSize="15sp"
+                    android:text="Sign Out"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/textcolor"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:textAlignment="viewStart"/>
+
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

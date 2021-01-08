@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/black"
+    tools:ctx=".PurchasePlanActivity">
+
+
+    <TextView
+        android:id="@+id/no_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_data_found"
+        android:textSize="18sp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_centerInParent="true"
+        />
+
+
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:paddingVertical="4dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:src="@drawable/logo"
+                    android:layout_centerInParent="true"
+                    android:padding="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="20dp"/>
+
+                <ImageView
+                    android:id="@+id/close_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_close_black_24dp"
+                    android:padding="15dp"
+                    android:clickable="true"
+                    android:tint="@color/textcolor"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_alignParentEnd="true"/>
+
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Get access to all premium content"
+                android:textSize="17sp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingVertical="12dp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:layout_marginTop="@dimen/spacing_middle"/>
+
+            <LinearLayout
+                android:layout_marginTop="@dimen/spacing_mlarge"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:paddingVertical="10dp"
+                android:layout_marginBottom="@dimen/spacing_mlarge"
+                android:layout_height="wrap_content">
+
+                <com.pingpong.widget.ScaleImageView
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/onlinepayment"/>
+
+                <LinearLayout
+                    android:layout_marginStart="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/unlimited_movies"
+                        android:textSize="16sp"
+                        android:gravity="center"
+                        android:layout_marginBottom="8dp"
+                        android:drawablePadding="5dp"
+                        android:textColor="@color/white"
+                        android:drawableLeft="@drawable/ic_check_circle_blue"/>
+
+                    <TextView
+                        android:layout_marginBottom="8dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/all_tv_series"
+                        android:textSize="16sp"
+                        android:textColor="@color/white"
+                        android:gravity="center"
+                        android:drawablePadding="5dp"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:drawableLeft="@drawable/ic_check_circle_blue"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/tv_channels"
+                        android:textSize="16sp"
+                        android:visibility="gone"
+                        android:gravity="center"
+                        android:drawablePadding="5dp"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:drawableLeft="@drawable/ic_check_circle_blue"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/all_kids_videos"
+                        android:visibility="gone"
+                        android:textSize="16sp"
+                        android:gravity="center"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:drawablePadding="5dp"
+                        android:drawableLeft="@drawable/ic_check_circle_blue"/>
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/pacakge_rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="24dp"
+                android:nestedScrollingEnabled="false"/>
+
+        </LinearLayout>
+
+
+    </androidx.core.widget.NestedScrollView>
+
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+
+
+</RelativeLayout>

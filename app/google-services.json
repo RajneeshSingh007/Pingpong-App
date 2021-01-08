@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "366848484415",
+    "firebase_url": "https://pingpong-6a640.firebaseio.com",
+    "project_id": "pingpong-6a640",
+    "storage_bucket": "pingpong-6a640.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:366848484415:android:2328b84ba87a7cdb82c48a",
+        "android_client_info": {
+          "package_name": "com.pingpongentertainment.ott"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "366848484415-nkk56ikk1f2bundkqv7aaivgb3vl254g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pingpongentertainment.ott",
+            "certificate_hash": "975804c4fa77ad4248fe154e7dc606e44c6ef846"
+          }
+        },
+        {
+          "client_id": "366848484415-u1lvgl2ll82k62ulakcc2ntudkijvui4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pingpongentertainment.ott",
+            "certificate_hash": "453c2e7cacc37e25f99838b84959b2e828452e65"
+          }
+        },
+        {
+          "client_id": "366848484415-jp6ekncug0t0ue8eatvprfh4kqfem3lr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVma7gCp4x5acSxRyROnllcV9pyXfPmzE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "366848484415-jp6ekncug0t0ue8eatvprfh4kqfem3lr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
