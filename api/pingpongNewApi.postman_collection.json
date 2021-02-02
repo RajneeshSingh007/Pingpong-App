@@ -1,0 +1,143 @@
+{
+	"info": {
+		"_postman_id": "ca034488-528d-45c5-8636-cf91d1ff034c",
+		"name": "pingpongNewApi",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Single Detail (Series) With Skip Intro",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/single_details?id=30&type=tvseries",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"single_details"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "30"
+						},
+						{
+							"key": "type",
+							"value": "tvseries"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send OTP",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "API-KEY",
+						"value": "4b982cf54adca1b",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "send",
+							"value": "8169186245",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/sendotp",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"sendotp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vips Amount Credit Api",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "UGluZ3Bvbmc6MUAzNDVBYSM=",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Basic UGluZ3Bvbmc6MUAzNDVBYSM=",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Username\": \"8169186245\",\n    \"Amount\":5,\n    \"Securekey\":\"jX8hIM36IcXdNHjwbu0QQ1bl9aeOXRkQ\" //(static)\n}"
+				},
+				"url": {
+					"raw": "http://vipswallet.com/api/VipsPartner/CreditUserWalletBalance",
+					"protocol": "http",
+					"host": [
+						"vipswallet",
+						"com"
+					],
+					"path": [
+						"api",
+						"VipsPartner",
+						"CreditUserWalletBalance"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

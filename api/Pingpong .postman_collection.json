@@ -1,0 +1,998 @@
+{
+	"info": {
+		"_postman_id": "8b3bf1b6-3a0a-430c-9efe-89bccd745b41",
+		"name": "Pingpong ",
+		"description": "Api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login (Get Started Screen)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "8169186245",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "dummy",
+							"type": "text"
+						},
+						{
+							"key": "flag",
+							"value": "true",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/login",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login (Login Screen)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "8169186245",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "C00l@123",
+							"type": "text"
+						},
+						{
+							"key": "flag",
+							"value": "false",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/login",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Signup",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "API-KEY",
+						"value": "4b982cf54adca1b",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "aditya.salunkhe9055@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "phone",
+							"value": "7208828399",
+							"type": "text"
+						},
+						{
+							"key": "name",
+							"value": "demo",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "123123",
+							"type": "text"
+						},
+						{
+							"key": "ref",
+							"value": "0",
+							"description": "change 1 incase vips user logged in\n",
+							"type": "text"
+						},
+						{
+							"key": "city",
+							"value": "mumbai",
+							"type": "text"
+						},
+						{
+							"key": "State",
+							"value": "maharashtra",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/signup",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reset Pasword (Forgot screen)",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "API-KEY",
+						"value": "4b982cf54adca1b",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "8169186245",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/password_reset_phone",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"password_reset_phone"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VipsPartner Add User",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic UGluZ3Bvbmc6MUAzNDVBYSM=",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"MobileNo\": \"7208828399\",\n    \"Password\": \"123123\",\n    \"FName\": \"demo\",\n    \"LName\": \"\",\n    \"Emailid\": \"aditya.salunkhe9055@gmail.com\",\n    \"RefeId\": \"0\",\n    \"State\": \"maharashtra\",\n    \"City\": \"mumbai\",\n    \"PartnerId\":\"Pingpong\",\n    \"AreaId\":\"0\"\n}"
+				},
+				"url": {
+					"raw": "http://vipswallet.com/api/VipsPartner/AddExternalUser",
+					"protocol": "http",
+					"host": [
+						"vipswallet",
+						"com"
+					],
+					"path": [
+						"api",
+						"VipsPartner",
+						"AddExternalUser"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VipsPartner Login",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Basic UGluZ3Bvbmc6MUAzNDVBYSM="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"MobileNo\": \"8169186245\",\n    \"Password\": \"C00l@123\",   \n    \"PartnerId\":\"Pingpong\"\n}"
+				},
+				"url": {
+					"raw": "http://vipswallet.com/api/VipsPartner/AddExternalUser",
+					"protocol": "http",
+					"host": [
+						"vipswallet",
+						"com"
+					],
+					"path": [
+						"api",
+						"VipsPartner",
+						"AddExternalUser"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VipsPartner Login Check",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Basic UGluZ3Bvbmc6MUAzNDVBYSM="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"MobileNo\": \"8169186245\",\n    \"PartnerId\":\"Pingpong\"\n}"
+				},
+				"url": {
+					"raw": "http://vipswallet.com/api/VipsPartner/LoginExternalUser",
+					"protocol": "http",
+					"host": [
+						"vipswallet",
+						"com"
+					],
+					"path": [
+						"api",
+						"VipsPartner",
+						"LoginExternalUser"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VipsPartner CheckBalance",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Basic UGluZ3Bvbmc6MUAzNDVBYSM="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Username\": \"8169186245\",\n    \"Password\":\"C00l@123\",\n    \"PartnerId\":\"Pingpong\"\n}"
+				},
+				"url": {
+					"raw": "http://vipswallet.com/api/VipsPartner/CheckBalance",
+					"protocol": "http",
+					"host": [
+						"vipswallet",
+						"com"
+					],
+					"path": [
+						"api",
+						"VipsPartner",
+						"CheckBalance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VipsPartner PurchaseMembership",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Basic UGluZ3Bvbmc6MUAzNDVBYSM="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Username\": \"8169186245\",\n    \"Password\":\"C00l@123\", //password important\n    \"PartnerId\":\"Pingpong\",\n    \"WalletType\":\"PG\", //PG (Payment from payumoney, payment gateway), VIPSWALLET_APP (From wallet)\n    \"ProductName\":\"PINGPONG_MEMBERSHIP_199\" //Text combine with price of selected package, eg. 399 -> PINGPONG_MEMBERSHIP_399\n}"
+				},
+				"url": {
+					"raw": "http://vipswallet.com/api/VipsPartner/PurchaseMembership",
+					"protocol": "http",
+					"host": [
+						"vipswallet",
+						"com"
+					],
+					"path": [
+						"api",
+						"VipsPartner",
+						"PurchaseMembership"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Home",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"value": "4b982cf54adca1b",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/home_content_for_android",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"home_content_for_android"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Single Detail (Series)",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/single_details?id=30&type=tvseries",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"single_details"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "30"
+						},
+						{
+							"key": "type",
+							"value": "tvseries"
+						}
+					]
+				},
+				"description": "user skip_intro key to skip series/movies \r\nskip_intro format is mm:ss (mintues:second)\r\neg.\r\nafter 10 second, display button to skip"
+			},
+			"response": []
+		},
+		{
+			"name": "Single Detail (Movies)",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"value": "4b982cf54adca1b",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/single_details?id=56&type=movie",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"single_details"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "56"
+						},
+						{
+							"key": "type",
+							"value": "movie"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Movies List",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/movies?page=1",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"movies"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1",
+							"description": "page number for paginatio"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Series List",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/tvseries?page=1",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"tvseries"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1",
+							"description": "page number for paginatio"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UserDetail by id",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/user_details_by_user_id?id=1132",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"user_details_by_user_id"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1132",
+							"description": "user-id"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Content_by_genre_id",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/content_by_genre_id?page=1&id=7",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"content_by_genre_id"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1",
+							"description": "page number for paginatio"
+						},
+						{
+							"key": "id",
+							"value": "7",
+							"description": "genre id"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Subscription Package",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/all_package",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"all_package"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/search?q=m&type=movie&range_to=0&range_from=0&tv_category_id=0&genre_id=0&country_id=0",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "m",
+							"description": "user input\n"
+						},
+						{
+							"key": "type",
+							"value": "movie",
+							"description": "static"
+						},
+						{
+							"key": "range_to",
+							"value": "0",
+							"description": "static"
+						},
+						{
+							"key": "range_from",
+							"value": "0",
+							"description": "static"
+						},
+						{
+							"key": "tv_category_id",
+							"value": "0",
+							"description": "static"
+						},
+						{
+							"key": "genre_id",
+							"value": "0",
+							"description": "static"
+						},
+						{
+							"key": "country_id",
+							"value": "0",
+							"description": "static"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check_user_subscription_status",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/check_user_subscription_status?user_id=1132",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"check_user_subscription_status"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "1132"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "subscription_history",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/subscription_history?user_id=1132",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"subscription_history"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "1132"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Store_payment_info (Susbsciption)",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "API-KEY",
+						"type": "text",
+						"value": "4b982cf54adca1b"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "plan_id",
+							"value": "4",
+							"description": "plan id from selected package",
+							"type": "text"
+						},
+						{
+							"key": "user_id",
+							"value": "1132",
+							"type": "text"
+						},
+						{
+							"key": "paid_amount",
+							"value": "399",
+							"description": "add additional amount incase subscption is selected from payumoney eg. total amount = plan price + additional price (if any available from payumoney response)\n",
+							"type": "text"
+						},
+						{
+							"key": "payment_method",
+							"value": "Wallet",
+							"description": "if selected wallet -> Vips Wallet else\ndata of mode from payumoney response eg. UPI/CC/NB ...\n ",
+							"type": "text"
+						},
+						{
+							"key": "payment_info",
+							"value": "Vips Wallet",
+							"description": "if selected wallet -> Vips Wallet else\ncombined data of txnid, paymentId from payumoney response\n with separater & eg. TX123&25565",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/store_payment_info",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"store_payment_info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send OTP",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "API-KEY",
+						"value": "4b982cf54adca1b",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "send",
+							"value": "8169186245",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://pingpongentertainment.com/rest-api/v100/sendotp",
+					"protocol": "https",
+					"host": [
+						"pingpongentertainment",
+						"com"
+					],
+					"path": [
+						"rest-api",
+						"v100",
+						"sendotp"
+					]
+				},
+				"description": "OTP API for mobile registeration verification\r\n\r\nsteps:\r\n1.Get started Screen -> after user check api if user is from vips -> verify otp using this api ->  signup -> creditamount (5rs) api using amount credit api\r\n2.Get started Screen -> after user check api if user is new (not from vips) -> registeration page -> verify otp using this api ->  signup -> check referral number from firebase if exist then call creditamount (5rs) api else signup api"
+			},
+			"response": []
+		}
+	]
+}
