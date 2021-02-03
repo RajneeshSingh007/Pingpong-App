@@ -8,6 +8,9 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.material.navigation.NavigationView;
 
@@ -133,6 +136,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
 
         // To resolve cast button visibility problem. Check Cast State when app is open.
         CastContext castContext = CastContext.getSharedInstance(this);

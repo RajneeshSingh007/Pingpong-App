@@ -256,5 +256,6 @@
     <string name="wallet_link">https://play.google.com/store/apps/details?id=com.vipswallet.shopping</string>
     <string name="ludogame_link">https://vipswallet.com/VipsLudo/</string>
     <string name="pingpong_link">https://play.google.com/store/apps/details?id=com.pingpong</string>
-
+    <string name="admob_appid">ca-app-pub-6228455483394109~3588934603</string>
+    <string name="admob_banner_id">ca-app-pub-6228455483394109/9367040748</string>
 </resources>

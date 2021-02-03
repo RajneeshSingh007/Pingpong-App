@@ -137,8 +137,8 @@ public class SignUpActivity extends AppCompatActivity implements OtpCallback {
         mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
 
         FirebaseFirestoreSettings.Builder firebaseFirestoreSettings = new FirebaseFirestoreSettings.Builder();
-        firebaseFirestoreSettings.setPersistenceEnabled(false)
-                .setTimestampsInSnapshotsEnabled(true);
+        firebaseFirestoreSettings.setPersistenceEnabled(false);
+                //.setTimestampsInSnapshotsEnabled(true);
         firebaseFirestore  = FirebaseFirestore.getInstance();
         firebaseFirestore.setFirestoreSettings(firebaseFirestoreSettings.build());
 

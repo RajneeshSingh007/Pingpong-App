@@ -150,8 +150,8 @@ public class LoginActivity extends AppCompatActivity {
 
         });
         FirebaseFirestoreSettings.Builder firebaseFirestoreSettings = new FirebaseFirestoreSettings.Builder();
-        firebaseFirestoreSettings.setPersistenceEnabled(false)
-                .setTimestampsInSnapshotsEnabled(true);
+        firebaseFirestoreSettings.setPersistenceEnabled(false);
+                //.setTimestampsInSnapshotsEnabled(true);
         firebaseFirestore  = FirebaseFirestore.getInstance();
         firebaseFirestore.setFirestoreSettings(firebaseFirestoreSettings.build());
 

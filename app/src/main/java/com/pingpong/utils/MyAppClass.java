@@ -161,8 +161,8 @@ public class MyAppClass extends Application implements Application.ActivityLifec
         FacebookSdk.setApplicationId(BuildConfig.APPLICATION_ID);
 
         FirebaseFirestoreSettings.Builder firebaseFirestoreSettings = new FirebaseFirestoreSettings.Builder();
-        firebaseFirestoreSettings.setPersistenceEnabled(false)
-                .setTimestampsInSnapshotsEnabled(true);
+        firebaseFirestoreSettings.setPersistenceEnabled(false);
+              //  .setTimestampsInSnapshotsEnabled(true);
         firebaseFirestore  = FirebaseFirestore.getInstance();
         firebaseFirestore.setFirestoreSettings(firebaseFirestoreSettings.build());
 
