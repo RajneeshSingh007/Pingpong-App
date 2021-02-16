@@ -2,6 +2,7 @@ package com.pingpong;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
+import android.graphics.drawable.LayerDrawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -44,15 +46,18 @@ import retrofit2.Retrofit;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -73,6 +78,7 @@ import android.widget.Toast;
 
 import com.balysv.materialripple.MaterialRippleLayout;
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -80,8 +86,10 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.PlayerMessage;
+import com.google.android.exoplayer2.Renderer;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
@@ -94,13 +102,18 @@ import com.google.android.exoplayer2.drm.MediaDrmCallback;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
+import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
 import com.google.android.exoplayer2.ext.rtmp.RtmpDataSourceFactory;
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.MediaSourceFactory;
 import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
+import com.google.android.exoplayer2.source.ads.AdPlaybackState;
 import com.google.android.exoplayer2.source.ads.AdsLoader;
+import com.google.android.exoplayer2.source.ads.AdsMediaSource;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.source.hls.DefaultHlsDataSourceFactory;
@@ -115,11 +128,19 @@ import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.ui.SubtitleView;
 import com.google.android.exoplayer2.ui.TimeBar;
 import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.framework.CastContext;
@@ -172,6 +193,7 @@ import com.pingpong.utils.Tools;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -182,9 +204,8 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 public class DetailsActivity extends AppCompatActivity implements SessionAvailabilityListener, ProgramAdapter.OnProgramClickListener, EpisodeAdapter.OnTVSeriesEpisodeItemClickListener,
-        Runnable {
+        Runnable,View.OnTouchListener {
 
-    private Disposable timerDisposable;
     private static final int PERMISSION_REQUEST_CODE = 1;
     private static final int PRELOAD_TIME_S = 20;
     public static final String TAG = DetailsActivity.class.getSimpleName();
@@ -255,6 +276,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
     private String strSubtitle = "Null";
     public static MediaSource mediaSource = null;
     public static ImageView imgSubtitle;
+    public static ImageView imgAudioTrack;
     public ImageButton exo_play;
     private List<SubtitleModel> listSub = new ArrayList<>();
     private AlertDialog alertDialog;
@@ -327,6 +349,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
     private EpisodeAdapter episodeAdapter;
     private boolean firstTimeSkip = true;
     private Handler handler;
+    private LinearLayout adsView;
 
     private Button skipIntroBtn;
     private String skipTimer = "";
@@ -334,7 +357,24 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
     private boolean clikedSkip = true;
     private int backClickedCount = -1;
 
+    private ImaAdsLoader adsLoader;
 
+
+    private Dialog volumeDialog, brightnessDialog;
+    private int mScreenWidth, mScreenHeight;
+    private int mGestureDownVolume, rotation = 0;
+    private float mGestureDownBrightness;
+    private ImageView dialogVolImageView, dialogBrightnessImageView;
+    private TextView dialogVolProgressText, dialogBrightnessProgressText;
+    private ProgressBar dialogVolProgressBar, dialogBrightnessProgressBar;
+    private boolean isVol = false, isBrightness = false;
+    private LayerDrawable volumeDrawable, brightnessDrawable;
+    private float mDownX, mDownX2, mDownY, mDownY2;
+    private final int THRESHOLD = 80;
+    private RelativeLayout controllerlayout;
+    private String adsUrl = "";
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
@@ -373,7 +413,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         imgAddFav = findViewById(R.id.add_fav);
         imgBack = findViewById(R.id.img_back);
         cloneFullName = findViewById(R.id.text_namefull);
-       //exo_play = findViewById(R.id.exo_play);
+        //exo_play = findViewById(R.id.exo_play);
         webView = findViewById(R.id.webView);
         progressBar = findViewById(R.id.progressBar);
         llBottomParent = findViewById(R.id.llbottomparent);
@@ -401,6 +441,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         eptxt = findViewById(R.id.eptxt);
         episodeLayout = findViewById(R.id.episodeLayout);
         imgSubtitle = findViewById(R.id.img_subtitle);
+        imgAudioTrack = findViewById(R.id.audio_track);
         mediaRouteButton = findViewById(R.id.media_route_button);
         chromeCastTv = findViewById(R.id.chrome_cast_tv);
         castControlView = findViewById(R.id.cast_control_view);
@@ -447,6 +488,8 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         cloneGenre = findViewById(R.id.genre_tv2);
         trailerwatch = findViewById(R.id.trailerwatch);
         skipIntroBtn = findViewById(R.id.skipIntro);
+        adsView = findViewById(R.id.adsview);
+        controllerlayout = findViewById(R.id.controllerlayout);
 
         exo_rew = findViewById(R.id.exo_rew);
         exo_ffwd = findViewById(R.id.exo_ffwd);
@@ -458,7 +501,11 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         cloneLayout.setVisibility(GONE);
         chromeCastTv.setVisibility(GONE);
         serverIv.setVisibility(GONE);
-        aspectRatioIv.setVisibility(GONE);
+        aspectRatioIv.setVisibility(VISIBLE);
+        adsView.setVisibility(GONE);
+
+        Uri uri = Uri.parse("");
+        adsLoader = new ImaAdsLoader(this,uri);
 
         handler = new Handler();
 
@@ -494,23 +541,13 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         exo_rew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(player != null){
-                    if(player.getCurrentPosition() >= 0){
-                        player.seekTo(player.getCurrentPosition()-10000);
-                        PreferenceUtils.addWatchHistory(DetailsActivity.this, ogID, player.getCurrentPosition()-10000,type, episodeID, IMAGE_THUMB,false);
-                    }
-                }
+                seekBackward();
             }
         });
         exo_ffwd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(player != null){
-                    if(player.getCurrentPosition() <= player.getDuration()) {
-                        player.seekTo(player.getCurrentPosition() + 10000);
-                        PreferenceUtils.addWatchHistory(DetailsActivity.this, ogID, player.getCurrentPosition() + 10000,type, episodeID, IMAGE_THUMB,false);
-                    }
-                }
+                seekForward();
             }
         });
 //        exo_play.setOnClickListener(new View.OnClickListener() {
@@ -571,6 +608,11 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
 
                 controlFullScreenPlayer();
 
+            }
+        });
+        imgAudioTrack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
             }
         });
         imgSubtitle.setOnClickListener(new View.OnClickListener() {
@@ -636,18 +678,38 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         skipIntroBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    if(player != null) {
-                        long convertedTime = Tools.convertTimeToMill(skipTimer);
-                        //Log.e(TAG, "convertedTime: " + convertedTime);
-                        player.seekTo(convertedTime);
-                        skipIntroBtn.setVisibility(GONE);
-                    }
+                if(player != null) {
+                    long convertedTime = Tools.convertTimeToMill(skipTimer);
+                    //Log.e(TAG, "convertedTime: " + convertedTime);
+                    player.seekTo(convertedTime);
+                    skipIntroBtn.setVisibility(GONE);
+                }
             }
         });
 
-        //loadAd();
-//        Intent intent = new Intent(this,TestPlayer.class);
-//        startActivity(-intent);
+        controllerlayout.setOnTouchListener(this);
+    }
+
+
+    private void seekForward(){
+        if(player != null){
+            if(player.getCurrentPosition() >= 0 && player.getCurrentPosition() <= player.getDuration()){
+                long pos = player.getCurrentPosition()+10000;
+                player.seekTo(pos);
+                PreferenceUtils.addWatchHistory(DetailsActivity.this, ogID, pos,type, episodeID, IMAGE_THUMB,false);
+            }
+        }
+    }
+
+    private void seekBackward(){
+        if(player != null){
+            if(player.getCurrentPosition() <= player.getDuration() && player.getCurrentPosition() > 0) {
+                long pos = player.getCurrentPosition()-10000;
+                player.seekTo(pos);
+                PreferenceUtils.addWatchHistory(DetailsActivity.this, ogID, pos,type, episodeID, IMAGE_THUMB,false);
+            }
+        }
+
     }
 
     private void hideSystemUI() {
@@ -667,6 +729,8 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                 getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
             }
         });
+        hideBrightnessDialog();
+        hideVolDialog();
     }
 
     private void showSystemUI() {
@@ -698,17 +762,17 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
 
     @SuppressLint("SourceLockedOrientationActivity")
     public void controlFullScreenPlayer() {
+        if(nextEpiModel != null && episodeAdapter != null){
+            episodeAdapter.changeHolder(episodeAdapter.getNextPos());
+        }
         if (isFullScr) {
             showSystemUI();
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             fullScreenByClick = false;
             isFullScr = false;
-            if(nextEpiModel != null && episodeAdapter != null){
-                episodeAdapter.changeHolder(nextPos);
-            }
             swipeRefreshLayout.setVisibility(VISIBLE);
             cloneFullName.setVisibility(GONE);
-            aspectRatioIv.setVisibility(GONE);
+            //aspectRatioIv.setVisibility(GONE);
             simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
             //player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT);
             if (isVideo) {
@@ -720,13 +784,13 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         } else {
             backClickedCount = 2;
             cloneFullName.setVisibility(VISIBLE);
-            imgFull.setVisibility(GONE);
+            //imgFull.setVisibility(GONE);
             hideSystemUI();
-            if(nextEpiModel != null && episodeAdapter != null){
-                episodeAdapter.changeHolder(nextPos);
-            }
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            aspectRatioIv.setVisibility(VISIBLE);
+            simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
+            player.setVideoScalingMode(Renderer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
+
+            //aspectRatioIv.setVisibility(VISIBLE);
             //simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
             //player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT);
             fullScreenByClick = true;
@@ -793,24 +857,27 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
             @Override
             public void onClick(View view) {
                 if (aspectClickCount == 1) {
-                    //Toast.makeText(DetailsActivity.this, "Fill", Toast.LENGTH_SHORT).show();
                     simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
-                    //player.getVideoComponent().setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
-                    player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+                    player.setVideoScalingMode(Renderer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
                     aspectClickCount = 2;
                 } else if (aspectClickCount == 2) {
-                    //Toast.makeText(DetailsActivity.this, "Fit", Toast.LENGTH_SHORT).show();
                     simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
-                    //player.getVideoComponent().setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT);
-                    player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT);
+                    player.setVideoScalingMode(Renderer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
                     aspectClickCount = 3;
                 } else if (aspectClickCount == 3) {
-                    //Toast.makeText(DetailsActivity.this, "Zoom", Toast.LENGTH_SHORT).show();
-                    simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
-                    //player.getVideoComponent().setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
-                    player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT);
+                    simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_ZOOM);
+                    player.setVideoScalingMode(Renderer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+                    aspectClickCount = 4;
+                } else if (aspectClickCount == 4) {
+                    simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT);
+                    player.setVideoScalingMode(Renderer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+                    aspectClickCount = 5;
+                } else if (aspectClickCount == 5) {
+                    simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
+                    player.setVideoScalingMode(Renderer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
                     aspectClickCount = 1;
                 }
+
 
             }
         });
@@ -836,21 +903,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         trailerwatch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(type.equalsIgnoreCase("tvseries")){
-                    if (!listServer.isEmpty()) {
-                        cloneFullName.setVisibility(GONE);
-                        playMovieTrailer();
-                    }else{
-                        new ToastMsg(DetailsActivity.this).toastIconError(getString(R.string.no_trailer_found));
-                    }
-                }else{
-                    if (!trailerServer.isEmpty()) {
-                        cloneFullName.setVisibility(GONE);
-                        playMovieTrailer();
-                    }else{
-                        new ToastMsg(DetailsActivity.this).toastIconError(getString(R.string.no_trailer_found));
-                    }
-                }
+                playTrailers();
             }
         });
         watchNowBt.setOnClickListener(new View.OnClickListener() {
@@ -858,6 +911,26 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
             public void onClick(View v) {
                 //new ToastMsg(DetailsActivity.this).toastIconError("Coming Soon!!");
                 if (!listServer.isEmpty()) {
+//                    if(checkActivePlan()){
+//                        if(type.equalsIgnoreCase("tvseries")){
+//                            if(listServer.size() > 0 && listServer.get(0).getListEpi().size() > 0){
+//                                seasonSpinnerContainer.setVisibility(VISIBLE);
+//                                episodeLayout.setVisibility(VISIBLE);
+//                            }else{
+//                                new ToastMsg(DetailsActivity.this).toastIconError(getString(R.string.no_video_found));
+//                                seasonSpinnerContainer.setVisibility(GONE);
+//                                episodeLayout.setVisibility(GONE);
+//                            }
+//                        }else {
+//                            preparePlayer(listServer.get(0));
+//                            descriptionLayout.setVisibility(GONE);
+//                            lPlay.setVisibility(VISIBLE);
+//                        }
+//                    }else{
+//                        startPlanActivity();
+//                    }
+
+                    //free_time or paid based
                     if(type.equalsIgnoreCase("tvseries")){
                         if(listServer.size() > 0 && listServer.get(0).getListEpi().size() > 0){
                             seasonSpinnerContainer.setVisibility(VISIBLE);
@@ -870,11 +943,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                     }else {
                         paid = listServer.get(0).getPaid();
                         free_time = listServer.get(0).getFree_time();
-                        if(!free_time.equalsIgnoreCase("0")){
-                            preparePlayer(listServer.get(0));
-                            descriptionLayout.setVisibility(GONE);
-                            lPlay.setVisibility(VISIBLE);
-                        }else{
+                        if(free_time.equalsIgnoreCase("0")){
                             if(checkActivePlan()){
                                 preparePlayer(listServer.get(0));
                                 descriptionLayout.setVisibility(GONE);
@@ -882,8 +951,13 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                             }else{
                                 startPlanActivity();
                             }
+                        }else{
+                            preparePlayer(listServer.get(0));
+                            descriptionLayout.setVisibility(GONE);
+                            lPlay.setVisibility(VISIBLE);
                         }
                     }
+
                     ////Log.e(TAG, "onClick: "+paid);
 //                    if (!TextUtils.isEmpty(paid)){
 //                        if(paid.equalsIgnoreCase("1")){
@@ -917,10 +991,9 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
             @Override
             public void onClick(View v) {
                 if (!listInternalDownload.isEmpty() || !listExternalDownload.isEmpty()) {
-//                    ActiveStatus activeStatus = PreferenceUtils.getStatus(DetailsActivity.this);
-//                            if(activeStatus != null && !TextUtils.isEmpty(activeStatus.getStatus()) && activeStatus.getStatus().equalsIgnoreCase("active")){
-//                                openDownloadServerDialog();
-//                            }
+                    if(checkActivePlan()){
+                        openDownloadServerDialog();
+                    }
                 } else {
                     Toast.makeText(DetailsActivity.this, R.string.no_download_server_found, Toast.LENGTH_SHORT).show();
                 }
@@ -1004,9 +1077,10 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
 //                    if (type.equals("tv") || type.equals("tvseries")) {
 //                        imgFull.setVisibility(VISIBLE);
 //                    } else {
-                    imgFull.setVisibility(VISIBLE);
+                    //imgFull.setVisibility(VISIBLE);
                     //}
 
+                    // invisible download icon for live tv
 //                    if (!TextUtils.isEmpty(download_check) && download_check.equals("1")) {
 //                        if (!tv) {
 //                            if (activeMovie) {
@@ -1022,14 +1096,16 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                         imgSubtitle.setVisibility(VISIBLE);
                     }
                     //visible top name
-                    cloneFullName.setVisibility(GONE);
+                    //cloneFullName.setVisibility(GONE);
                     //imgSubtitle.setVisibility(VISIBLE);
                 } else {
-                    imgBack.setVisibility(GONE);
-                    imgFull.setVisibility(GONE);
-                    imgSubtitle.setVisibility(GONE);
+                    //imgBack.setVisibility(GONE);
+                    //imgFull.setVisibility(GONE);
+
+                    // imgSubtitle.setVisibility(GONE);
+
                     volumnControlLayout.setVisibility(GONE);
-                    cloneFullName.setVisibility(GONE);
+                    //cloneFullName.setVisibility(GONE);
                 }
             }
         });
@@ -1047,6 +1123,29 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
             }
         });
 
+        MobileAds.initialize(DetailsActivity.this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
+    }
+
+    private void playTrailers(){
+        if(type.equalsIgnoreCase("tvseries")){
+            if (!listServer.isEmpty()) {
+                cloneFullName.setVisibility(GONE);
+                playMovieTrailer();
+            }else{
+                //   new ToastMsg(DetailsActivity.this).toastIconError(getString(R.string.no_trailer_found));
+            }
+        }else{
+            if (!trailerServer.isEmpty()) {
+                cloneFullName.setVisibility(GONE);
+                playMovieTrailer();
+            }else{
+                // new ToastMsg(DetailsActivity.this).toastIconError(getString(R.string.no_trailer_found));
+            }
+        }
     }
 
     private void startPlanActivity(){
@@ -1220,6 +1319,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         mediaUrl = obj.getStremURL();
         skipTimer = obj.getSkipIntro();
         free_time = obj.getFree_time();
+        adsUrl = obj.getAdsUrl();
         //Log.e(TAG, "preparePlayer: "+skipTimer);
 
         //if (!castSession) {
@@ -1233,7 +1333,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         if (listSub.size() != 0) {
             imgSubtitle.setVisibility(VISIBLE);
         }else {
-            imgSubtitle.setVisibility(GONE);
+            // imgSubtitle.setVisibility(GONE);
         }
 
 //        } else {
@@ -1259,23 +1359,60 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
     }
 
     void clear_previous() {
-
+        backClickedCount = -1;
+        if(nextEpiModel != null && episodeAdapter != null){
+            episodeAdapter.changeHolder(-1);
+        }
+        releasePlayer();
         strCast = "";
         strDirector = "";
         strGenre = "";
+        listSub.clear();
+        trailerServer.clear();
+        listServer.clear();
+        listRelated.clear();
+        listComment.clear();
         listDownload.clear();
         listInternalDownload.clear();
         listExternalDownload.clear();
         programs.clear();
         castCrews.clear();
-    }
-
-    private void prepareSubtitleList(Context context, List<SubtitleModel> list){
-
+        cloneLayout.setVisibility(GONE);
+        skipIntroBtn.setVisibility(GONE);
+        lPlay.setVisibility(GONE);
+        cloneFullName.setVisibility(GONE);
+        //aspectRatioIv.setVisibility(GONE);
+        descriptionLayout.setVisibility(VISIBLE);
+        swipeRefreshLayout.setVisibility(VISIBLE);
     }
 
 
     public void showSubtitleDialog(Context context, List<SubtitleModel> list) {
+        ViewGroup viewGroup = findViewById(android.R.id.content);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.custom_dialog_subtitle, viewGroup, false);
+        ImageView cancel = dialogView.findViewById(R.id.cancel);
+
+        RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerView);
+        SubtitleAdapter adapter = new SubtitleAdapter(context, list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        alertDialog = builder.create();
+        alertDialog.show();
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.cancel();
+            }
+        });
+
+    }
+
+    public void showAudioTrackDialog(Context context, List<SubtitleModel> list) {
         ViewGroup viewGroup = findViewById(android.R.id.content);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.custom_dialog_subtitle, viewGroup, false);
         ImageView cancel = dialogView.findViewById(R.id.cancel);
@@ -1401,71 +1538,66 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
 
     @Override
     public void onEpisodeItemClickTvSeries(String type, View view, EpiModel obj, int position, EpisodeAdapter.OriginalViewHolder holder,EpiModel nextObj, int newpos) {
+        episodesplay(true, type, obj);
+    }
+
+    private void episodesplay(boolean release, String type, EpiModel obj){
         if(obj != null){
+            if(release){
+                releasePlayer();
+            }
+            id = obj.getId();
             paid = obj.getPaid();
+            skipTimer = obj.getSkipIntro();
             free_time = obj.getFree_time();
-            if(!free_time.equalsIgnoreCase("0")){
-                nextPos = newpos;
-                skipTimer = obj.getSkipIntro();
-                free_time = obj.getFree_time();
-                cloneLayout.setVisibility(VISIBLE);
-                episodeID = obj.getId();
-                if (type.equalsIgnoreCase("embed")){
-                    CommonModels model = new CommonModels();
-                    model.setStremURL(obj.getStreamURL());
-                    model.setServerType(obj.getServerType());
-                    model.setSkipIntro(obj.getSkipIntro());
-                    if(obj.getSubtitleList() != null && obj.getSubtitleList().size() > 0){
-                        model.setListSub(obj.getSubtitleList());
-                    }else{
-                        model.setListSub(Collections.emptyList());
-                    }
-                    releasePlayer();
-                    preparePlayer(model);
-                }else {
-                    playWithoutEmbed(obj);
-                }
+            cloneLayout.setVisibility(VISIBLE);
+            episodeID = obj.getId();
+            adsUrl = obj.getAdsUrl();
+            CommonModels model = new CommonModels();
+            model.setStremURL(obj.getStreamURL());
+            model.setServerType(obj.getServerType());
+            model.setSkipIntro(obj.getSkipIntro());
+            listSub.clear();
+            if(obj.getSubtitleList() != null && obj.getSubtitleList().size() > 0){
+                model.setListSub(obj.getSubtitleList());
+                listSub.addAll(obj.getSubtitleList());
             }else{
+                model.setListSub(Collections.emptyList());
+            }
+            //free time based play
+            if(free_time.equalsIgnoreCase("0")){
                 if(checkActivePlan()){
-                    nextPos = newpos;
-                    skipTimer = obj.getSkipIntro();
-                    free_time = obj.getFree_time();
-                    cloneLayout.setVisibility(VISIBLE);
-                    episodeID = obj.getId();
                     if (type.equalsIgnoreCase("embed")){
-                        CommonModels model = new CommonModels();
-                        model.setStremURL(obj.getStreamURL());
-                        model.setServerType(obj.getServerType());
-                        model.setSkipIntro(obj.getSkipIntro());
-                        if(obj.getSubtitleList() != null && obj.getSubtitleList().size() > 0){
-                            model.setListSub(obj.getSubtitleList());
-                        }else{
-                            model.setListSub(Collections.emptyList());
-                        }
-                        releasePlayer();
                         preparePlayer(model);
                     }else {
-                        playWithoutEmbed(obj);
+                        initMoviePlayer(obj.getStreamURL(), obj.getServerType(), DetailsActivity.this, !isFullScr);
                     }
                 }else{
                     startPlanActivity();
                 }
+            }else{
+                if (type.equalsIgnoreCase("embed")){
+                    preparePlayer(model);
+                }else {
+                    initMoviePlayer(obj.getStreamURL(), obj.getServerType(), DetailsActivity.this, !isFullScr);
+                }
             }
-        }
-    }
 
-    private void playWithoutEmbed(EpiModel obj){
-        if (obj != null){
-            id = obj.getId();
-            if (obj.getSubtitleList().size() != 0){
-                listSub.clear();
-                listSub.addAll(obj.getSubtitleList());
-                imgSubtitle.setVisibility(VISIBLE);
-            }else {
-                listSub.clear();
-                imgSubtitle.setVisibility(GONE);
-            }
-            initMoviePlayer(obj.getStreamURL(), obj.getServerType(), DetailsActivity.this, !isFullScr);
+//            if (type.equalsIgnoreCase("embed")){
+//                CommonModels model = new CommonModels();
+//                model.setStremURL(obj.getStreamURL());
+//                model.setServerType(obj.getServerType());
+//                model.setSkipIntro(obj.getSkipIntro());
+//                if(obj.getSubtitleList() != null && obj.getSubtitleList().size() > 0){
+//                    model.setListSub(obj.getSubtitleList());
+//                }else{
+//                    model.setListSub(Collections.emptyList());
+//                }
+//                releasePlayer();
+//                preparePlayer(model);
+//            }else {
+//              initMoviePlayer(obj.getStreamURL(), obj.getServerType(), DetailsActivity.this, !isFullScr);
+//            }
         }
     }
 
@@ -1527,26 +1659,6 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
 
     }
 
-    private void loadAd() {
-//        AdsConfig adsConfig = db.getConfigurationData().getAdsConfig();
-//        if (adsConfig.getAdsEnable().equals("1")) {
-//
-//            if (adsConfig.getMobileAdsNetwork().equalsIgnoreCase(Constants.ADMOB)) {
-//                BannerAds.ShowAdmobBannerAds(this, adView);
-//                PopUpAds.ShowAdmobInterstitialAds(this);
-//
-//            } else if (adsConfig.getMobileAdsNetwork().equalsIgnoreCase(Constants.START_APP)) {
-//                //BannerAds.showStartAppBanner(DetailsActivity.this, adView);
-//                PopUpAds.showStartappInterstitialAds(DetailsActivity.this);
-//
-//            } else if (adsConfig.getMobileAdsNetwork().equalsIgnoreCase(Constants.NETWORK_AUDIENCE)) {
-//                BannerAds.showFANBanner(this, adView);
-//                PopUpAds.showFANInterstitialAds(DetailsActivity.this);
-//            }
-//
-//        }
-
-    }
 
     private void initGetData() {
         strGenre = "";
@@ -1576,6 +1688,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                 downloadBt.setVisibility(GONE);
                 watchNowBt.setVisibility(VISIBLE);
                 trailerwatch.setVisibility(VISIBLE);
+                playTrailers();
 
                 castCrewAdapter = new CastCrewAdapter(this, castCrews);
                 castRv.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
@@ -1584,120 +1697,122 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
 
                 getSeriesData(type, id);
 
-                if (listSub.size() == 0) {
-                    imgSubtitle.setVisibility(GONE);
-                }
+//                if (listSub.size() == 0) {
+//                    imgSubtitle.setVisibility(GONE);
+//                }
 
             } else {
-                imgFull.setVisibility(GONE);
+                // imgFull.setVisibility(GONE);
                 listServer.clear();
                 rvRelated.removeAllViews();
                 listRelated.clear();
-                if (listSub.size() == 0) {
-                    imgSubtitle.setVisibility(GONE);
-                }
+
+//                if (listSub.size() == 0) {
+//                    imgSubtitle.setVisibility(GONE);
+//                }
                 castCrewAdapter = new CastCrewAdapter(this, castCrews);
                 castRv.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
                 castRv.setHasFixedSize(true);
                 castRv.setAdapter(castCrewAdapter);
                 getMovieData(type, id);
 
-                final ServerAdapter.OriginalViewHolder[] viewHolder = {null};
+                //final ServerAdapter.OriginalViewHolder[] viewHolder = {null};
             }
-
-        } else {
-            tv = true;
-            imgSubtitle.setVisibility(GONE);
-            llcomment.setVisibility(GONE);
-            serverIv.setVisibility(GONE);
-
-            rvServer.setVisibility(VISIBLE);
-            descriptionLayout.setVisibility(GONE);
-            lPlay.setVisibility(VISIBLE);
-
-            // hide exo player some control
-            hideExoControlForTv();
-
-            tvLayout.setVisibility(VISIBLE);
-
-            // hide program guide if its disable from api
-            if (!PreferenceUtils.isProgramGuideEnabled(DetailsActivity.this)) {
-                proGuideTv.setVisibility(GONE);
-                programRv.setVisibility(GONE);
-
-            }
-
-            watchStatusTv.setText(getString(R.string.watching_on) + " " + getString(R.string.app_name));
-
-            tvRelated.setText(getString(R.string.all_tv_channel));
-
-            rvServer.removeAllViews();
-            listServer.clear();
-            rvRelated.removeAllViews();
-            listRelated.clear();
-
-            programAdapter = new ProgramAdapter(programs, this);
-            programAdapter.setOnProgramClickListener(this);
-            programRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-            programRv.setHasFixedSize(true);
-            programRv.setAdapter(programAdapter);
-
-            imgAddFav.setVisibility(GONE);
-
-            serverAdapter = new ServerAdapter(this, listServer, "tv");
-            rvServer.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-            rvServer.setHasFixedSize(true);
-            rvServer.setAdapter(serverAdapter);
-            llBottom.setVisibility(GONE);
-
-            final ServerAdapter.OriginalViewHolder[] viewHolder = {null};
-            serverAdapter.setOnItemClickListener(new ServerAdapter.OnItemClickListener() {
-                @Override
-                public void onItemClick(View view, CommonModels obj, int position, ServerAdapter.OriginalViewHolder holder) {
-                    mediaUrl = obj.getStremURL();
-
-
-                    //if (!castSession) {
-                    initMoviePlayer(obj.getStremURL(), obj.getServerType(), DetailsActivity.this, true);
-
-//                    } else {
-//
-//                        if (obj.getServerType().toLowerCase().equals("embed")) {
-//
-//                            castSession = false;
-//                            castPlayer.setSessionAvailabilityListener(null);
-//                            castPlayer.release();
-//
-//                            // invisible control ui of exoplayer
-//                            player.setPlayWhenReady(true);
-//                            simpleExoPlayerView.setUseController(true);
-//
-//                            // invisible control ui of casting
-//                            castControlView.setVisibility(GONE);
-//                            chromeCastTv.setVisibility(GONE);
-//                        } else {
-//                          //  showQueuePopup(DetailsActivity.this, null, getMediaInfo());
-//                        }
-//                    }
-
-                    serverAdapter.chanColor(viewHolder[0], position);
-                    holder.name.setTextColor(getResources().getColor(R.color.colorPrimary));
-                    viewHolder[0] = holder;
-                }
-
-                @Override
-                public void getFirstUrl(String url) {
-                    mediaUrl = url;
-                }
-
-                @Override
-                public void hideDescriptionLayout() {
-
-                }
-            });
-
 
         }
+//        else {
+//            tv = true;
+//            imgSubtitle.setVisibility(GONE);
+//            llcomment.setVisibility(GONE);
+//            serverIv.setVisibility(GONE);
+//
+//            rvServer.setVisibility(VISIBLE);
+//            descriptionLayout.setVisibility(GONE);
+//            lPlay.setVisibility(VISIBLE);
+//
+//            // hide exo player some control
+//            hideExoControlForTv();
+//
+//            tvLayout.setVisibility(VISIBLE);
+//
+//            // hide program guide if its disable from api
+//            if (!PreferenceUtils.isProgramGuideEnabled(DetailsActivity.this)) {
+//                proGuideTv.setVisibility(GONE);
+//                programRv.setVisibility(GONE);
+//
+//            }
+//
+//            watchStatusTv.setText(getString(R.string.watching_on) + " " + getString(R.string.app_name));
+//
+//            tvRelated.setText(getString(R.string.all_tv_channel));
+//
+//            rvServer.removeAllViews();
+//            listServer.clear();
+//            rvRelated.removeAllViews();
+//            listRelated.clear();
+//
+//            programAdapter = new ProgramAdapter(programs, this);
+//            programAdapter.setOnProgramClickListener(this);
+//            programRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+//            programRv.setHasFixedSize(true);
+//            programRv.setAdapter(programAdapter);
+//
+//            imgAddFav.setVisibility(GONE);
+//
+//            serverAdapter = new ServerAdapter(this, listServer, "tv");
+//            rvServer.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+//            rvServer.setHasFixedSize(true);
+//            rvServer.setAdapter(serverAdapter);
+//            llBottom.setVisibility(GONE);
+//
+//            final ServerAdapter.OriginalViewHolder[] viewHolder = {null};
+//            serverAdapter.setOnItemClickListener(new ServerAdapter.OnItemClickListener() {
+//                @Override
+//                public void onItemClick(View view, CommonModels obj, int position, ServerAdapter.OriginalViewHolder holder) {
+//                    mediaUrl = obj.getStremURL();
+//
+//
+//                    //if (!castSession) {
+//                    initMoviePlayer(obj.getStremURL(), obj.getServerType(), DetailsActivity.this, true);
+//
+////                    } else {
+////
+////                        if (obj.getServerType().toLowerCase().equals("embed")) {
+////
+////                            castSession = false;
+////                            castPlayer.setSessionAvailabilityListener(null);
+////                            castPlayer.release();
+////
+////                            // invisible control ui of exoplayer
+////                            player.setPlayWhenReady(true);
+////                            simpleExoPlayerView.setUseController(true);
+////
+////                            // invisible control ui of casting
+////                            castControlView.setVisibility(GONE);
+////                            chromeCastTv.setVisibility(GONE);
+////                        } else {
+////                          //  showQueuePopup(DetailsActivity.this, null, getMediaInfo());
+////                        }
+////                    }
+//
+//                    serverAdapter.chanColor(viewHolder[0], position);
+//                    holder.name.setTextColor(getResources().getColor(R.color.colorPrimary));
+//                    viewHolder[0] = holder;
+//                }
+//
+//                @Override
+//                public void getFirstUrl(String url) {
+//                    mediaUrl = url;
+//                }
+//
+//                @Override
+//                public void hideDescriptionLayout() {
+//
+//                }
+//            });
+//
+//
+//        }
     }
 
     private void openWebActivity(String s, Context context, String videoType) {
@@ -1735,34 +1850,51 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
     }
 
     public void initVideoPlayer(String url, Context context, String type) {
-        progressBar.setVisibility(VISIBLE);
-        if (player != null){
-            player.stop();
-            player.release();
-        }
-        webView.setVisibility(GONE);
-        playerLayout.setVisibility(VISIBLE);
 
 //        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
 //
 //        DefaultTrackSelector trackSelector = new
 //                DefaultTrackSelector(videoTrackSelectionFactory);
 
-        LoadControl loadControl = new DefaultLoadControl();
-
         //DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
         //DefaultLoadControl loadControl = new DefaultLoadControl(allocator, 360000, 600000, 2500, 5000, -1, true);
 
-        DefaultBandwidthMeter defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
-                .build();
-
-        RenderersFactory factory = new DefaultRenderersFactory(this);
-
         //CacheDataSourceFactory dataSourceFactory = new CacheDataSourceFactory(context, defaultBandwidthMeter, -1, -1);
+
+        //TrackSelector trackSelectorDef = new DefaultTrackSelector(parametersBuilder.build(),factory);
+
+        //DefaultRenderersFactory defaultRenderersFactory = new DefaultRenderersFactory(this);
+
+//        ExoPlayer.Builder builder = new ExoPlayer.Builder(this, factory);
+//        builder.setBandwidthMeter(defaultBandwidthMeter)
+//                .setTrackSelector(selector)
+//                .setUseLazyPreparation(true);
+//        FrameworkMediaDrm frameworkMediaDrm = null;
+//        try {
+//            frameworkMediaDrm = FrameworkMediaDrm.newInstance(C.WIDEVINE_UUID);
+//        } catch (UnsupportedDrmException e) {
+//            e.printStackTrace();
+//        }
+
+//        HttpMediaDrmCallback mediaDrmCallback = new HttpMediaDrmCallback("https://configpingpongkeys.s3.ap-south-1.amazonaws.com/keyaes.key", new DefaultHttpDataSourceFactory("Pingpong"));
+//        mediaDrmCallback.setKeyRequestProperty("EXT-X-KEY","METHOD=AES-128,URI=\"data:text/plain;charset=utf-8,50696e67506f6e67456e746572524b53");
+//        DefaultDrmSessionManager<FrameworkMediaCrypto> defaultDrmSessionManager = new DefaultDrmSessionManager<>(C.WIDEVINE_UUID,frameworkMediaDrm,mediaDrmCallback,null);
+
+        //player = ExoPlayerFactory.newSimpleInstance(context,factory, trackSelector,loadControl, null, defaultBandwidthMeter);
+        //player.setPlayWhenReady(true);
+        //simpleExoPlayerView.setPlayer(player);
+
+        progressBar.setVisibility(VISIBLE);
+        if (player != null){
+            player.stop();
+            player.release();
+        }
+
+        webView.setVisibility(GONE);
+        playerLayout.setVisibility(VISIBLE);
 
         DefaultTrackSelector.ParametersBuilder parametersBuilder = new DefaultTrackSelector.ParametersBuilder();
         int speedCheck = Connectivity.isConnectedFast(this);
-        //Log.e(TAG, "speedCheck: "+speedCheck );
         int HI_BITRATE = 2097152;
         int MI_BITRATE = 1048576;
         int LO_BITRATE = 524288;
@@ -1781,63 +1913,112 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
             parametersBuilder.setMaxVideoBitrate(LO_BITRATE);
             parametersBuilder.setMaxVideoSize(480, 360);
         }
+
         DefaultTrackSelector selector = new DefaultTrackSelector(this);
         selector.setParameters(parametersBuilder.build());
-        //TrackSelector trackSelectorDef = new DefaultTrackSelector(parametersBuilder.build(),factory);
-        DefaultRenderersFactory defaultRenderersFactory = new DefaultRenderersFactory(this);
-//        ExoPlayer.Builder builder = new ExoPlayer.Builder(this, factory);
-//        builder.setBandwidthMeter(defaultBandwidthMeter)
-//                .setTrackSelector(selector)
-//                .setUseLazyPreparation(true);
-        FrameworkMediaDrm frameworkMediaDrm = null;
-        try {
-            frameworkMediaDrm = FrameworkMediaDrm.newInstance(C.WIDEVINE_UUID);
-        } catch (UnsupportedDrmException e) {
-            e.printStackTrace();
-        }
 
 
-//        HttpMediaDrmCallback mediaDrmCallback = new HttpMediaDrmCallback("https://configpingpongkeys.s3.ap-south-1.amazonaws.com/keyaes.key", new DefaultHttpDataSourceFactory("Pingpong"));
-//        mediaDrmCallback.setKeyRequestProperty("EXT-X-KEY","METHOD=AES-128,URI=\"data:text/plain;charset=utf-8,50696e67506f6e67456e746572524b53");
-//        DefaultDrmSessionManager<FrameworkMediaCrypto> defaultDrmSessionManager = new DefaultDrmSessionManager<>(C.WIDEVINE_UUID,frameworkMediaDrm,mediaDrmCallback,null);
+        LoadControl loadControl = new DefaultLoadControl();
 
-        player = ExoPlayerFactory.newSimpleInstance(context,factory, selector,loadControl, null, defaultBandwidthMeter);
-        //player = ExoPlayerFactory.newSimpleInstance(context,factory, trackSelector,loadControl, null, defaultBandwidthMeter);
-        //player.setPlayWhenReady(true);
-        //simpleExoPlayerView.setPlayer(player);
-        //Log.e(TAG, "initVideoPlayer: "+url);
-        //"https://d207etoso989bj.cloudfront.net/Nasha/s1ep6drm/NASHA - Ep 6.m3u8"
+        DefaultBandwidthMeter defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
+                .build();
+
+        RenderersFactory factory = new DefaultRenderersFactory(this);
+
+
+        // player = ExoPlayerFactory.newSimpleInstance(context,factory, selector,loadControl, null, defaultBandwidthMeter);
+
+        DataSource.Factory dataSourceFactory = null;
+
+        //Uri uri = Uri.parse("https://optimizedhlsvideos.s3.ap-south-1.amazonaws.com/Nasha/s1ep6drm/NASHA+-+Ep+6.m3u8");
         Uri uri = Uri.parse(url);
-        //Log.e(TAG, "initVideoPlayer1: "+uri.toString());
-        //Uri uri = Uri.parse("https://dt7z54t21jsql.cloudfront.net/Episode+1_Nights+of+Dark+Forest.m3u8");
 
-        if (type.equals("hls")) {
-            //mediaSource = buildMediaSource(uri,dataSourceFactory);
-            mediaSource = hlsMediaSource(uri, context);
+        if (type.equals("hls") || url.contains("m3u8")) {
+            dataSourceFactory = defaultFactory(this);
+            mediaSource = returnMediasource(dataSourceFactory, uri, context, 1);
         } else if (type.equals("youtube")) {
-            //Log.e("youtube url  :: ", url);
             extractYoutubeUrl(url, context, 18);
         } else if (type.equals("youtube-live")) {
-            //Log.e("youtube url  :: ", url);
             extractYoutubeUrl(url, context, 133);
         } else if (type.equals("rtmp")) {
-            mediaSource = rtmpMediaSource(uri);
-        } else {
-            //mediaSource = buildMediaSource(uri,dataSourceFactory);
-            mediaSource = mediaSource(uri, context);
-        }
-        if(url.contains("m3u8")) {
-            mediaSource = hlsMediaSource(uri, context);
+            dataSourceFactory = new RtmpDataSourceFactory();
+            mediaSource = returnMediasource(dataSourceFactory, uri, context, 0);
+        }else{
+            dataSourceFactory = defaultFactory(this);
+            mediaSource = returnMediasource(dataSourceFactory, uri, context, -1);
         }
 
-        //mediaSource = mediaSource(uri, context);
-        //Toast.makeText(context, "castSession:"+getCastSessionObj()+"", Toast.LENGTH_SHORT).show();
-        player.prepare(mediaSource, true, false);
+        player = new SimpleExoPlayer.Builder(this,factory)
+                .setBandwidthMeter(defaultBandwidthMeter)
+                .setTrackSelector(selector)
+                .setLoadControl(loadControl)
+                .build();
+
+//        MediaItem.Builder builder = new MediaItem.Builder()
+//                .setAdTagUri(getString(R.string.ad_tag_url))
+//                .setUri(uri)
+//                .setMimeType(MimeTypes.APPLICATION_M3U8)
+//                .setDrmLicenseUri("https://configpingpongkeys.s3.ap-south-1.amazonaws.com/keyaes.key")
+//                .setDrmUuid(C.WIDEVINE_UUID);
+//
+//        mediaItemsList.add(builder.build());
+
+        //Log.e(TAG, "adsUrl: "+adsUrl);
+
+        player.setMediaSource(mediaSource, true);
+
+//        if(checkActivePlan()){
+//            player.setMediaSource(mediaSource, true);
+//        }else{
+////            long minutes = C.MILLIS_PER_SECOND * 300;
+////            AdPlaybackState adPlaybackState = new AdPlaybackState(0, minutes);
+////            if(!TextUtils.isEmpty(adsUrl)){
+////                String[] splits = adsUrl.split(",");
+////                int index = 0, secondindex= 0;
+////                for (String ads : splits) {
+////                    //adPlaybackState.withAdUri(index,secondindex, Uri.parse(splits[0]));
+////                    index++;
+////                    secondindex++;
+////                }
+////            }
+//            AdsLoader.AdViewProvider adViewProvider = new AdsLoader.AdViewProvider() {
+//                @Override
+//                public ViewGroup getAdViewGroup() {
+//                    return simpleExoPlayerView.getAdViewGroup();
+//                }
+//
+//                @Override
+//                public List<AdsLoader.OverlayInfo> getAdOverlayInfos() {
+//                    return simpleExoPlayerView.getAdOverlayInfos();
+//                }
+//            };
+
+//            MediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(dataSourceFactory);
+//
+//            AdsMediaSource adsMediaSource = new AdsMediaSource(mediaSource,null,mediaSourceFactory,adsLoader, adViewProvider);
+//            player.setMediaSource(adsMediaSource, true);
+//            adsLoader.start(new AdsLoader.EventListener() {
+//                @Override
+//                public void onAdPlaybackState(AdPlaybackState adPlaybackState) {
+//
+//                }
+//            }, adViewProvider);
+//        }
+
+        player.prepare();
+
         simpleExoPlayerView.setPlayer(player);
+
+        simpleExoPlayerView.setControllerHideDuringAds(true);
+
+        //adsLoader.setPlayer(player);
+
         long savedDur = PreferenceUtils.getWatchedDuration(DetailsActivity.this, ogID,cloneType, episodeID);
-        //Log.e(TAG, "initVideoPlayer: "+savedDur+"::"+ogID+"::"+ episodeID);
+
         player.setPlayWhenReady(true);
+
         activeMovie = true;
+
         player.addListener(new Player.EventListener() {
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
@@ -1845,10 +2026,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                     isPlaying = true;
                     progressBar.setVisibility(View.GONE);
                     if(firstTimeSkip){
-                        //Log.e(TAG, "initVideoPlayer: "+savedDur +"="+ogID+"="+cloneType+"="+episodeID);
-                        //if(savedDur > 0 && savedDur < player.getDuration()){
                         player.seekTo(savedDur);
-                        //}
                         firstTimeSkip = false;
                     }
                     saveCurrentPosition();
@@ -1866,22 +2044,16 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                 } else if (playbackState == Player.STATE_ENDED) {
                     isPlaying = false;
                     progressBar.setVisibility(VISIBLE);
-                    //playWithoutEmbed();
                     if(cloneType.equalsIgnoreCase("tvseries")){
-                        //if(nextEpiModel != null){
                         if(episodeAdapter != null){
                             nextEpiModel = episodeAdapter.nextEpModel();
                             if(nextEpiModel != null){
-                                episodeID = nextEpiModel.getId();
-                                playWithoutEmbed(nextEpiModel);
+                                episodesplay(false, nextEpiModel.getServerType(), nextEpiModel);
                                 episodeAdapter.changeHolder(nextPos);
                             }
                         }
-                        //}
                     }
                 } else {
-                    //handler.removeCallbacks(DetailsActivity.this);
-                    // player paused in any state
                     isPlaying = false;
                 }
             }
@@ -1905,6 +2077,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
 //                }
 //            }
 //        });
+
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -1916,10 +2089,9 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                     int itag = tag;
                     String downloadUrl = ytFiles.get(itag).getUrl();
                     youtubeDownloadUr = downloadUrl;
-                    //Log.e("YOUTUBE::", String.valueOf(downloadUrl));
                     try {
-
-                        MediaSource mediaSource = mediaSource(Uri.parse(downloadUrl), context);
+                        DataSource.Factory factory = defaultFactory(context);
+                        MediaSource mediaSource = returnMediasource(factory, Uri.parse(downloadUrl), context, -1);
                         player.prepare(mediaSource, true, false);
                         if (Config.YOUTUBE_VIDEO_AUTO_PLAY) {
                             player.setPlayWhenReady(true);
@@ -1981,36 +2153,43 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                 .send();
     }
 
-    private MediaSource rtmpMediaSource(Uri uri) {
-        MediaSource videoSource = null;
-        RtmpDataSourceFactory dataSourceFactory = new RtmpDataSourceFactory();
-        videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(uri);
-
-        return videoSource;
+    private DataSource.Factory defaultFactory(Context context){
+        DefaultBandwidthMeter.Builder builder = new DefaultBandwidthMeter.Builder(this);
+        builder.setResetOnNetworkTypeChange(true);
+        DefaultBandwidthMeter defaultBandwidthMeter = builder.build();
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, Util.getUserAgent(context, "Pingpong"), defaultBandwidthMeter);
+        return dataSourceFactory;
     }
 
-    private MediaSource hlsMediaSource(Uri uri, Context context) {
-        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
-                Util.getUserAgent(context, "Pingpong"), bandwidthMeter);
+    /**
+     * mediaSource
+     * @param uri
+     * @param context
+     * @param type
+     * @return
+     */
+    private MediaSource returnMediasource(DataSource.Factory factory, Uri uri, Context context, int type){
+        MediaSource mediaSource = null;
+        MediaItem mediaItem = new MediaItem.Builder()
+                .setUri(uri)
+                .setMimeType(type == 1 ? MimeTypes.APPLICATION_M3U8 : MimeTypes.APPLICATION_MP4)
+                .setDrmLicenseUri("https://configpingpongkeys.s3.ap-south-1.amazonaws.com/keyaes.key")
+                .setDrmUuid(C.WIDEVINE_UUID)
+                .build();
+        if (type == 0){
+            mediaSource = new ProgressiveMediaSource.Factory(factory)
+                    .createMediaSource(mediaItem);
+        }else if (type == 1){
+            mediaSource =  new HlsMediaSource.Factory(new DefaultHlsDataSourceFactory(factory))
+                    //.setDrmUserAgent("Mozilla/5.0 (Linux; Android 10; V1936A; wv) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36")
+                    .createMediaSource(mediaItem);
+        }else {
+            mediaSource = new ProgressiveMediaSource.Factory(factory)
+                    .createMediaSource(mediaItem);
+        }
 
-        return new HlsMediaSource.Factory(
-                new DefaultHlsDataSourceFactory(dataSourceFactory))
-                .createMediaSource(uri);
-
-        // return videoSource;
+        return mediaSource;
     }
-
-    private MediaSource mediaSource(Uri uri, Context context) {
-        DefaultDataSourceFactory defdataSourceFactory = new DefaultDataSourceFactory(this,"Pingpong");
-        return new ProgressiveMediaSource.Factory(defdataSourceFactory)
-                .createMediaSource(uri);
-//        return new ExtractorMediaSource.Factory(
-//                new DefaultHttpDataSourceFactory("pingpong")).
-//                createMediaSource(uri);
-    }
-
 
     public void setSelectedSubtitle(MediaSource mediaSource, String subtitle, Context context) {
         MergingMediaSource mergedSource;
@@ -2019,7 +2198,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
 
             Format subtitleFormat = Format.createTextSampleFormat(
                     null, // An identifier for the track. May be null.
-                    MimeTypes.TEXT_VTT, // The mime type. Must be set correctly.
+                    MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
                     Format.NO_VALUE, // Selection flags for the track.
                     "en"); // The subtitle language. May be null.
 
@@ -2035,69 +2214,27 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
             mergedSource = new MergingMediaSource(mediaSource, subtitleSource);
             player.prepare(mergedSource, false, false);
             player.setPlayWhenReady(true);
-            //resumePlayer();
-
         } else {
-            Toast.makeText(context, "there is no subtitle", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "No Subtitle Available...", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void addToFav() {
-        Retrofit retrofit = RetrofitClient.getRetrofitInstance();
-        FavouriteApi api = retrofit.create(FavouriteApi.class);
-        Call<FavoriteModel> call = api.addToFavorite(Config.API_KEY, userId, id);
-        call.enqueue(new Callback<FavoriteModel>() {
-            @Override
-            public void onResponse(Call<FavoriteModel> call, retrofit2.Response<FavoriteModel> response) {
-                if (response.code() == 200){
-                    if (response.body().getStatus().equalsIgnoreCase("success")){
-                        new ToastMsg(DetailsActivity.this).toastIconSuccess(response.body().getMessage());
-                        isFav = true;
-                        imgAddFav.setBackgroundResource(R.drawable.ic_favorite_white);
-                    } else {
-                        new ToastMsg(DetailsActivity.this).toastIconError(response.body().getMessage());
-                    }
-                }else {
-                    new ToastMsg(DetailsActivity.this).toastIconError(getString(R.string.error_toast));
-                }
-            }
-
-            @Override
-            public void onFailure(Call<FavoriteModel> call, Throwable t) {
-                new ToastMsg(DetailsActivity.this).toastIconError(getString(R.string.error_toast));
-
-            }
-        });
-
-    }
-
-    private void getActiveStatus(String userId) {
-        Retrofit retrofit = RetrofitClient.getRetrofitInstance();
-        SubscriptionApi subscriptionApi = retrofit.create(SubscriptionApi.class);
-
-        Call<ActiveStatus> call = subscriptionApi.getActiveStatus(Config.API_KEY, userId);
-        call.enqueue(new Callback<ActiveStatus>() {
-            @Override
-            public void onResponse(Call<ActiveStatus> call, retrofit2.Response<ActiveStatus> response) {
-                if(response.code() == 200){
-                    ActiveStatus activeStatus = response.body();
-                    if (!activeStatus.getStatus().equals("active")) {
-                        contentDetails.setVisibility(GONE);
-                        subscriptionLayout.setVisibility(VISIBLE);
-                    } else {
-                        contentDetails.setVisibility(VISIBLE);
-                        subscriptionLayout.setVisibility(GONE);
-                    }
-                    //PreferenceUtils.updateSubscriptionStatus(DetailsActivity.this);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ActiveStatus> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
-
+    private void bannerAds(String paid){
+        if(TextUtils.isEmpty(paid)){
+            return;
+        }
+        if(paid.equalsIgnoreCase("0")){
+            AdView adView = new AdView(DetailsActivity.this);
+            adView.setAdSize(AdSize.BANNER);
+            adView.setAdUnitId(getString(R.string.admob_banner_id));
+            AdRequest adRequest = new AdRequest.Builder()
+                    .build();
+            adView.loadAd(adRequest);
+            adsView.setVisibility(VISIBLE);
+            adsView.addView(adView);
+        }else{
+            adsView.setVisibility(GONE);
+        }
     }
 
     private void getSeriesData(String vtype, String vId) {
@@ -2113,6 +2250,9 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
 
                     SingleDetails singleDetails = response.body();
                     paid = singleDetails.getIsPaid();
+                    //show ads
+                    bannerAds(paid);
+
                     title = singleDetails.getTitle();
                     sereisTitleTv.setText(title);
                     sereisTitleTv.setVisibility(GONE);
@@ -2238,6 +2378,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                                     models.setSkipIntro(episode.getSkipIntro());
                                     models.setPaid(episode.getPaid());
                                     models.setFree_time(episode.getFree_time());
+                                    models.setAdsUrl(episode.getAds());
                                 }
                             }
                             seasonList.add("Season: " + season.getSeasonsName());
@@ -2259,6 +2400,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                                 model.setSkipIntro(episode.getSkipIntro());
                                 model.setPaid(episode.getPaid());
                                 model.setFree_time(episode.getFree_time());
+                                model.setAdsUrl(episode.getAds());
                                 if (i == 0 && j == 0) {
 
                                 } else {
@@ -2275,6 +2417,12 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                     shimmerFrameLayout.stopShimmer();
                     shimmerFrameLayout.setVisibility(GONE);
 
+                    if(!listServer.isEmpty() && listServer.size() > 0){
+                        trailerwatch.setVisibility(VISIBLE);
+                        playTrailers();
+                    }else{
+                        trailerwatch.setVisibility(GONE);
+                    }
 
 //                    if(seasonList.size() > 0){
 //                        if(listServer.get(0).getListEpi().size() > 0){
@@ -2357,13 +2505,18 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
 
                     SingleDetails singleDetails = response.body();
                     paid = singleDetails.getIsPaid();
+                    //show ads
+                    bannerAds(paid);
+
                     download_check = singleDetails.getEnableDownload();
                     castImageUrl = singleDetails.getThumbnailUrl();
+
                     if (!TextUtils.isEmpty(download_check) && download_check.equals("1")) {
                         downloadBt.setVisibility(VISIBLE);
                     } else {
                         downloadBt.setVisibility(GONE);
                     }
+
                     title = singleDetails.getTitle();
                     movieTitle = title;
 
@@ -2462,6 +2615,8 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                             models.setSkipIntro(video.getSkipIntro());
                             models.setFree_time(video.getFree_time());
                             models.setPaid(video.getPaid());
+                            models.setAdsUrl(video.getAds());
+                            adsUrl = video.getAds();
 
                             if (video.getFileType().equals("mp4")) {
                                 V_URL = video.getFileUrl();
@@ -2469,6 +2624,15 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
 
                             //----subtitle-----------
                             List<Subtitle> subArray = new ArrayList<>();
+
+//                            List<SubtitleModel> list = new ArrayList<>();
+//                            SubtitleModel subtitleModel = new SubtitleModel();
+//                            subtitleModel.setUrl("http://www.elsubtitle.com/tmp_searcher/The-Avengers_2012_English-ELSUBTITLE.COM-ST_25062135.srt");
+//                            subtitleModel.setLanguage("en");
+//                            list.add(subtitleModel);
+//                            listSub.addAll(list);
+//                            models.setListSub(list);
+
                             subArray.addAll(singleDetails.getVideos().get(i).getSubtitle());
                             if (subArray.size() != 0) {
                                 List<SubtitleModel> list = new ArrayList<>();
@@ -2482,11 +2646,13 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                                 listSub.addAll(list);
                                 models.setListSub(list);
                             } else {
-                                models.setSubtitleURL(strSubtitle);
+                                //models.setSubtitleURL(strSubtitle);
                             }
+
                             listServer.add(models);
                         }
-                        if(serverList.size() == 1){
+
+                        if(serverList.size() > 1){
                             Video video = serverList.get(0);
 
                             CommonModels models = new CommonModels();
@@ -2494,15 +2660,42 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                             models.setStremURL(video.getFileUrl());
                             models.setServerType(video.getFileType());
                             models.setSkipIntro(video.getSkipIntro());
-                            models.setFree_time(video.getFree_time());
-                            models.setPaid(video.getPaid());
+                            models.setAdsUrl(video.getAds());
 
                             if (video.getFileType().equals("mp4")) {
                                 V_URL = video.getFileUrl();
                             }
                             listServer.remove(0);
                             trailerServer.add(models);
+                            if(video.getFileUrl().contains(".mp4") || video.getFileUrl().contains(".m3u8") || video.getFileUrl().contains(".mkv")){
+                                trailerwatch.setVisibility(VISIBLE);
+                                playTrailers();
+                            }else{
+                                trailerwatch.setVisibility(GONE);
+                            }
+                        }else{
+                            trailerwatch.setVisibility(GONE);
                         }
+
+//                        if(serverList.size() == 2){
+//                            Video video = serverList.get(0);
+//
+//                            CommonModels models = new CommonModels();
+//                            models.setTitle(video.getLabel());
+//                            models.setStremURL(video.getFileUrl());
+//                            models.setServerType(video.getFileType());
+//                            models.setSkipIntro(video.getSkipIntro());
+//                            models.setFree_time(video.getFree_time());
+//                            models.setPaid(video.getPaid());
+//
+//                            if (video.getFileType().equals("mp4")) {
+//                                V_URL = video.getFileUrl();
+//                            }
+//                            listServer.remove(0);
+//                            trailerServer.add(models);
+//                        }else{
+//                            trailerwatch.setVisibility(GONE);
+//                        }
 
                         if (serverAdapter != null) {
                             serverAdapter.notifyDataSetChanged();
@@ -2565,38 +2758,11 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         });
     }
 
-
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
-
-    private void addComment(String videoId, String userId, final String comments) {
-
-        Retrofit retrofit = RetrofitClient.getRetrofitInstance();
-        CommentApi api = retrofit.create(CommentApi.class);
-        Call<PostCommentModel> call = api.postComment(Config.API_KEY, videoId, userId, comments);
-        call.enqueue(new Callback<PostCommentModel>() {
-            @Override
-            public void onResponse(Call<PostCommentModel> call, retrofit2.Response<PostCommentModel> response) {
-                if (response.body().getStatus().equals("success")){
-                    rvComment.removeAllViews();
-                    listComment.clear();
-                    //getComments();
-                    etComment.setText("");
-                    new ToastMsg(DetailsActivity.this).toastIconSuccess(response.body().getMessage());
-                }else {
-                    new ToastMsg(DetailsActivity.this).toastIconError(response.body().getMessage());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<PostCommentModel> call, Throwable t) {
-
-            }
-        });
     }
 
     public void hideDescriptionLayout() {
@@ -2616,12 +2782,28 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
     @Override
     protected void onPause() {
         super.onPause();
-        //Log.e("OnPause", "isPlaying: " + isPlaying);
+        pausevideoads();
+    }
+
+    private void  pausevideoads(){
         if (isPlaying && player != null) {
-            ////Log.e("PLAY:::","PAUSE");
-            //PreferenceUtils.addWatchHistory(DetailsActivity.this, ogID, player.getCurrentPosition(),type, episodeID, IMAGE_THUMB,false);
+            isPlaying = false;
             player.setPlayWhenReady(false);
         }
+        if(adsLoader != null){
+            adsLoader.pauseAd();
+        }
+    }
+
+    private void videoAdsresume(){
+        if (player != null && isPlaying == false) {
+            player.setPlayWhenReady(true);
+            descriptionLayout.setVisibility(GONE);
+            lPlay.setVisibility(VISIBLE);
+        }
+//        if(adsLoader != null){
+//            adsLoader.resumeAd();
+//        }
     }
 
 //    @Override
@@ -2636,7 +2818,6 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //Log.e(TAG, "onDestroy: ");
         // resetCastPlayer();
         releasePlayer();
         if(handler != null){
@@ -2652,6 +2833,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         }else if(isFullScr){
             controlFullScreenPlayer();
         }else{
+            pausevideoads();
             if(nextEpiModel != null && episodeAdapter != null){
                 episodeAdapter.changeHolder(-1);
             }
@@ -2659,7 +2841,7 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
             skipIntroBtn.setVisibility(GONE);
             lPlay.setVisibility(GONE);
             cloneFullName.setVisibility(GONE);
-            aspectRatioIv.setVisibility(GONE);
+            //aspectRatioIv.setVisibility(GONE);
             descriptionLayout.setVisibility(VISIBLE);
             swipeRefreshLayout.setVisibility(VISIBLE);
             backClickedCount = -1;
@@ -2669,29 +2851,20 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
     @Override
     protected void onResume() {
         super.onResume();
-        //startPlayer();
-        if (player != null) {
-            //PreferenceUtils.addWatchHistory(DetailsActivity.this, ogID, player.getCurrentPosition(),type, episodeID, IMAGE_THUMB,false);
-            if (type.equals("youtube") || type.equals("youtube-live")) {
-                if (Config.YOUTUBE_VIDEO_AUTO_PLAY) {
-                    player.setPlayWhenReady(true);
-                } else {
-                    player.setPlayWhenReady(false);
-                }
-            } else {
-                player.setPlayWhenReady(true);
-            }
-        }
+        videoAdsresume();
     }
 
     public void releasePlayer() {
         if (player != null) {
+            if(adsLoader != null) {
+                adsLoader.setPlayer(null);
+                adsLoader.release();
+            }
+            simpleExoPlayerView.setPlayer(null);
             player.setPlayWhenReady(true);
             player.stop();
             player.release();
             player = null;
-            simpleExoPlayerView.setPlayer(null);
-            //simpleExoPlayerView = null;
         }
     }
 
@@ -2924,70 +3097,6 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
         //Toast.makeText(this, "fjiaf", Toast.LENGTH_SHORT).show();
     }
 
-    public class RelativeLayoutTouchListener implements View.OnTouchListener {
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-
-                    //touch is start
-                    downX = event.getX();
-                    downY = event.getY();
-                    if (event.getX() < (sWidth / 2)) {
-
-                        //here check touch is screen left or right side
-                        intLeft = true;
-                        intRight = false;
-
-                    } else if (event.getX() > (sWidth / 2)) {
-
-                        //here check touch is screen left or right side
-                        intLeft = false;
-                        intRight = true;
-                    }
-                    break;
-
-                case MotionEvent.ACTION_UP:
-
-                case MotionEvent.ACTION_MOVE:
-
-                    //finger move to screen
-                    float x2 = event.getX();
-                    float y2 = event.getY();
-
-                    diffX = (long) (Math.ceil(event.getX() - downX));
-                    diffY = (long) (Math.ceil(event.getY() - downY));
-
-                    if (Math.abs(diffY) > Math.abs(diffX)) {
-                        if (intLeft) {
-                            //if left its for brightness
-
-                            if (downY < y2) {
-                                //down swipe brightness decrease
-                            } else if (downY > y2) {
-                                //up  swipe brightness increase
-                            }
-
-                        } else if (intRight) {
-
-                            //if right its for audio
-                            if (downY < y2) {
-                                //down swipe volume decrease
-                                mAudioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
-
-                            } else if (downY > y2) {
-                                //up  swipe volume increase
-                                mAudioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
-                            }
-                        }
-                    }
-            }
-            return true;
-        }
-
-
-    }
-
     public void saveCurrentPosition(){
         if(handler != null){
             handler.postDelayed(new Runnable() {
@@ -2999,5 +3108,208 @@ public class DetailsActivity extends AppCompatActivity implements SessionAvailab
                 }
             }, 1000);
         }
+    }
+
+
+    /**
+     * brightness Dialog
+     *
+     * @param brightness
+     */
+    private void showBrightnessDialog(int brightness) {
+        if (brightnessDialog == null) {
+            ViewGroup viewGroup = findViewById(android.R.id.content);
+            View localView = LayoutInflater.from(this).inflate(R.layout.video_brightness,viewGroup, false);
+            dialogBrightnessImageView = (ImageView) localView.findViewById(R.id.brightness_image_tip);
+            dialogBrightnessProgressText = (TextView) localView.findViewById(R.id.tv_brightness);
+            dialogBrightnessProgressBar = (ProgressBar) localView.findViewById(R.id.brightness_progressbar);
+            brightnessDialog = createDialogWithView(localView);
+        }
+        if (!brightnessDialog.isShowing()) {
+            brightnessDialog.show();
+        }
+        brightnessDrawable = (LayerDrawable) ContextCompat.getDrawable(this, R.drawable.volume);
+        brightnessDrawable.findDrawableByLayerId(android.R.id.progress).setTint(getResources().getColor(R.color.secondaycolor));
+        dialogBrightnessProgressBar.setProgressDrawable(brightnessDrawable);
+        if (brightness <= 0) {
+            dialogBrightnessImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_brightness_low));
+        } else {
+            dialogBrightnessImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_brightness_medium));
+        }
+        if (brightness > 100) {
+            brightness = 100;
+        } else if (brightness < 0) {
+            brightness = 0;
+        }
+        dialogBrightnessProgressText.setText(brightness + "%");
+        dialogBrightnessProgressBar.setProgress(brightness);
+    }
+
+    /**
+     * dismiss vol dialog
+     */
+    public void hideVolDialog() {
+        if (volumeDialog != null) {
+            volumeDialog.dismiss();
+        }
+    }
+
+    /**
+     * dismiss brightness dialog
+     */
+    public void hideBrightnessDialog() {
+        if (brightnessDialog != null) {
+            brightnessDialog.dismiss();
+        }
+    }
+
+    /**
+     * create Dialog
+     *
+     * @param view
+     * @return
+     */
+    public Dialog createDialogWithView(View view) {
+        Dialog dialog = new Dialog(this, R.style.dialog_theme);
+        dialog.setContentView(view);
+        Window window = dialog.getWindow();
+        if (window == null) {
+            return null;
+        }
+        window.addFlags(Window.FEATURE_ACTION_BAR);
+        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        window.setLayout(-2, -2);
+        WindowManager.LayoutParams localLayoutParams = window.getAttributes();
+        localLayoutParams.gravity = Gravity.CENTER;
+        window.setAttributes(localLayoutParams);
+        return dialog;
+    }
+
+    /**
+     * volume Dialog
+     *
+     * @param volumePercent
+     */
+    private void volumeDialog(int volumePercent) {
+        if (volumeDialog == null) {
+            ViewGroup viewGroup = findViewById(android.R.id.content);
+            View localView = LayoutInflater.from(this).inflate(R.layout.video_volume, viewGroup, false);
+            dialogVolImageView = (ImageView) localView.findViewById(R.id.volume_image_tip);
+            dialogVolProgressText = (TextView) localView.findViewById(R.id.tv_volume);
+            dialogVolProgressBar = (ProgressBar) localView.findViewById(R.id.volume_progressbar);
+            volumeDialog = createDialogWithView(localView);
+        }
+        if (!volumeDialog.isShowing()) {
+            volumeDialog.show();
+        }
+        volumeDrawable = (LayerDrawable) ContextCompat.getDrawable(this, R.drawable.volume);
+        volumeDrawable.findDrawableByLayerId(android.R.id.progress).setTint(getResources().getColor(R.color.secondaycolor));
+        dialogVolProgressBar.setProgressDrawable(volumeDrawable);
+        if (volumePercent <= 0) {
+            dialogVolImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_volume_off));
+        } else {
+            dialogVolImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_volume_up));
+        }
+        if (volumePercent > 100) {
+            volumePercent = 100;
+        } else if (volumePercent < 0) {
+            volumePercent = 0;
+        }
+        dialogVolProgressText.setText(volumePercent + "%");
+        dialogVolProgressBar.setProgress(volumePercent);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    public boolean onTouch(View v, MotionEvent motionEvent) {
+        switch (v.getId()) {
+            case R.id.controllerlayout:
+                float x = motionEvent.getX();
+                float y = motionEvent.getY();
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        isVol = false;
+                        isBrightness = false;
+                        mDownX = x;
+                        mDownY = y;
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        float deltaX = x - mDownX;
+                        float deltaY = y - mDownY;
+                        float absDeltaX = Math.abs(deltaX);
+                        float absDeltaY = Math.abs(deltaY);
+                        if (!isVol && !isBrightness) {
+                            if (absDeltaX > THRESHOLD || absDeltaY > THRESHOLD) {
+                                if (absDeltaX <= THRESHOLD) {
+                                    if (mDownX < mScreenWidth / 2 * 0.5f) {
+                                        isBrightness = true;
+                                        WindowManager.LayoutParams lp = getWindow().getAttributes();
+                                        if (lp.screenBrightness < 0) {
+                                            try {
+                                                mGestureDownBrightness = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
+                                            } catch (Settings.SettingNotFoundException e) {
+                                                e.printStackTrace();
+                                            }
+                                        } else {
+                                            mGestureDownBrightness = lp.screenBrightness * 255;
+                                        }
+                                    } else {
+                                        isVol = true;
+                                        mGestureDownVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                                    }
+                                }
+                            }
+                        }
+                        if (isVol) {
+                            deltaY = -deltaY;
+                            int max = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                            int deltaV = (int) (max * deltaY * 3 / mScreenHeight);
+                            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mGestureDownVolume + deltaV, 0);
+                            int volumePercent = (int) (mGestureDownVolume * 100 / max + deltaY * 3 * 100 / mScreenHeight);
+                            volumeDialog(volumePercent);
+                        }
+                        if (isBrightness) {
+                            deltaY = -deltaY;
+                            int deltaV = (int) (255 * deltaY * 3 / mScreenHeight);
+                            WindowManager.LayoutParams params = getWindow().getAttributes();
+                            if (((mGestureDownBrightness + deltaV) / 255) >= 1) {
+                                params.screenBrightness = 1;
+                            } else if (((mGestureDownBrightness + deltaV) / 255) <= 0) {
+                                params.screenBrightness = 0.01f;
+                            } else {
+                                params.screenBrightness = (mGestureDownBrightness + deltaV) / 255;
+                            }
+                            getWindow().setAttributes(params);
+                            int brightnessPercent = (int) (mGestureDownBrightness * 100 / 255 + deltaY * 3 * 100 / mScreenHeight);
+                            showBrightnessDialog(brightnessPercent);
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        mDownX2 = motionEvent.getX();
+                        mDownY2 = motionEvent.getY();
+                        float deltaXx = mDownX - mDownX2;
+                        float deltaYy = mDownY - mDownY2;
+                        if (Math.abs(deltaXx) > Math.abs(deltaYy)) {
+                            if (Math.abs(deltaXx) > THRESHOLD) {
+                                if (deltaXx < 0) {
+                                    seekForward();
+                                    return true;
+                                }
+                                if (deltaXx > 0) {
+                                    seekBackward();
+                                    return true;
+                                }
+                            }
+                        } else {
+                            if (Math.abs(deltaYy) > THRESHOLD) {
+                                hideSystemUI();
+                            }
+                        }
+                        break;
+                }
+                break;
+        }
+        return false;
     }
 }

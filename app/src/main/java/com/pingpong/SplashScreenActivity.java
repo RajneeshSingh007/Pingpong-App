@@ -15,8 +15,10 @@ import androidx.core.content.ContextCompat;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +28,7 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.VideoView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -64,82 +67,22 @@ public class SplashScreenActivity extends AppCompatActivity {
     private Thread timer;
     private DatabaseHelper db;
     private ImageView gif;
+    private VideoView videoView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setBackgroundDrawable(ContextCompat.getDrawable(SplashScreenActivity.this,R.drawable.splash_bg));
         setContentView(R.layout.activity_splashscreen);
         db = new DatabaseHelper(SplashScreenActivity.this);
         gif = findViewById(R.id.gif);
+        videoView = findViewById(R.id.video_app_intro);
 
         ColorDrawable drawable = new ColorDrawable();
         drawable.setColor(Color.TRANSPARENT);
-        if(!isDestroyed()){
-            GlideApp.with(SplashScreenActivity.this)
-                    .asGif()
-                    .load(R.raw.animation)
-                    .error(drawable)
-                    .placeholder(drawable)
-                    .into(gif);
-        }
-        getConfigurationData();
-        //print keyHash for facebook login
-       // createKeyHash(SplashScreenActivity.this, BuildConfig.APPLICATION_ID);
-
-        timer = new Thread() {
-            public void run() {
-                try {
-                    sleep(SPLASH_TIME);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    FirebaseDynamicLinks.getInstance()
-                            .getDynamicLink(getIntent())
-                            .addOnSuccessListener(SplashScreenActivity.this, new OnSuccessListener<PendingDynamicLinkData>() {
-                                @Override
-                                public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
-                                    Uri deepLink = null;
-                                    if (pendingDynamicLinkData != null) {
-                                        deepLink = pendingDynamicLinkData.getLink();
-                                        //Log.e("Signup", "getDynamicLink:Success"+ deepLink.toString());
-                                        String parse = deepLink.toString();
-                                        if(!TextUtils.isEmpty(parse)){
-                                            Intent intent = new Intent(SplashScreenActivity.this, SignUpActivity.class);
-                                            if(parse.contains("=")){
-                                                String split[] = deepLink.toString().split("=");
-                                                PreferenceUtils.setReferID(SplashScreenActivity.this, split[1]);
-                                                intent.putExtra("referral", split[1]);
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                startActivity(intent);
-                                                finish();
-                                            }else{
-                                                getStarted();
-                                            }
-                                        }else{
-                                            getStarted();
-                                        }
-                                    }else{
-                                        getStarted();
-                                    }
-                                }
-                            })
-                            .addOnFailureListener(SplashScreenActivity.this, new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    getStarted();
-                                }
-                            });
-
-                }
-            }
-        };
 
         // checking storage permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -149,7 +92,101 @@ public class SplashScreenActivity extends AppCompatActivity {
         } else {
             updateDb();
         }
+//        timer = new Thread() {
+//            public void run() {
+//                try {
+//                    sleep(SPLASH_TIME);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                } finally {
+//                    getConfigurationData();
+//                }
+//            }
+//        };
+//        try {
+//            timer.start();
+//        }catch (IllegalThreadStateException e){
+//            //
+//        }
+//        if(!isDestroyed()){
+//            GlideApp.with(SplashScreenActivity.this)
+//                    .asGif()
+//                    .load(R.raw.animation)
+//                    .error(drawable)
+//                    .placeholder(drawable)
+//                    .into(gif);
+//        }
+        StringBuilder stringBuilder = new StringBuilder().append("android.resource://").append(getPackageName()).append("/").append(R.raw.splash);
+        videoView.setVideoURI(Uri.parse(stringBuilder.toString()));
+        videoView.start();
+        videoView.setBackgroundColor(ContextCompat.getColor(this, R.color.splashbg));
+        videoView.setZOrderOnTop(true);
+//        float videoProportion = 1.5f;
+//        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+//        int screenHeight = getResources().getDisplayMetrics().heightPixels;
+//        float screenProportion = (float) screenHeight / (float) screenWidth;
+//        android.view.ViewGroup.LayoutParams lp = videoView.getLayoutParams();
+//        if (videoProportion < screenProportion) {
+//            lp.height= screenHeight;
+//            lp.width = (int) ((float) screenHeight / videoProportion);
+//        } else {
+//            lp.width = screenWidth;
+//            lp.height = (int) ((float) screenWidth * videoProportion);
+//        }
+//        videoView.setLayoutParams(lp);
+        videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+                getConfigurationData();
+                return false;
+            }
+        });
+        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                getConfigurationData();
+            }
+        });
+    }
 
+    private void startApp(){
+        FirebaseDynamicLinks.getInstance()
+                .getDynamicLink(getIntent())
+                .addOnSuccessListener(SplashScreenActivity.this, new OnSuccessListener<PendingDynamicLinkData>() {
+                    @Override
+                    public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                        Uri deepLink = null;
+                        if (pendingDynamicLinkData != null) {
+                            deepLink = pendingDynamicLinkData.getLink();
+                            //Log.e("Signup", "getDynamicLink:Success"+ deepLink.toString());
+                            String parse = deepLink.toString();
+                            if(!TextUtils.isEmpty(parse)){
+                                Intent intent = new Intent(SplashScreenActivity.this, SignUpActivity.class);
+                                if(parse.contains("=")){
+                                    String split[] = deepLink.toString().split("=");
+                                    PreferenceUtils.setReferID(SplashScreenActivity.this, split[1]);
+                                    intent.putExtra("referral", split[1]);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                    finish();
+                                }else{
+                                    getStarted();
+                                }
+                            }else{
+                                getStarted();
+                            }
+                        }else{
+                            getStarted();
+                        }
+                    }
+                })
+                .addOnFailureListener(SplashScreenActivity.this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        getStarted();
+                    }
+                });
     }
 
     public void getConfigurationData() {
@@ -158,7 +195,6 @@ public class SplashScreenActivity extends AppCompatActivity {
         Call<Configuration> call = api.getConfigurationData(Config.API_KEY);
         call.enqueue(new Callback<Configuration>() {
             @Override
-
             public void onResponse(Call<Configuration> call, Response<Configuration> response) {
                 if (response.code() == 200) {
                     Configuration configuration = response.body();
@@ -166,14 +202,21 @@ public class SplashScreenActivity extends AppCompatActivity {
                         //apk update check
                         if (isNeedUpdate(configuration.getApkUpdateInfo().getVersionCode())) {
                             showAppUpdateDialog(configuration.getApkUpdateInfo());
+                        }else{
+                            startApp();
                         }
+                    }else{
+                        startApp();
                     }
+                }else{
+                    startApp();
                 }
             }
 
             @Override
             public void onFailure(Call<Configuration> call, Throwable t) {
                 //Log.e("ConfigError", t.getLocalizedMessage());
+                startApp();
             }
         });
     }
@@ -204,11 +247,6 @@ public class SplashScreenActivity extends AppCompatActivity {
         //db.deleteRecentData();
         //db.deleteWatchData();
         db.close();
-        try {
-            timer.start();
-        }catch (IllegalThreadStateException e){
-            //
-        }
     }
 
     private void showAppUpdateDialog(final ApkUpdateInfo info) {
@@ -252,10 +290,8 @@ public class SplashScreenActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                && grantResults.length > 0 && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED  && grantResults.length > 0 && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
             //resume tasks needing this permission
-            getConfigurationData();
             updateDb();
         }
     }

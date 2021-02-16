@@ -28,6 +28,7 @@ public class CommonModels {
     public String skipIntro = "";
     public String paid = "0";
     public String free_time="0";
+    private String adsUrl = "";
 
     public boolean isInAppDownload;
 
@@ -226,5 +227,13 @@ public class CommonModels {
 
     public void setFree_time(String free_time) {
         this.free_time = free_time;
+    }
+
+    public String getAdsUrl() {
+        return adsUrl;
+    }
+
+    public void setAdsUrl(String adsUrl) {
+        this.adsUrl = adsUrl;
     }
 }

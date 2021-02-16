@@ -130,14 +130,16 @@ public class MoviesFragment extends Fragment {
 
             int orientation = getContext().getResources().getConfiguration().orientation;
             if(orientation == Configuration.ORIENTATION_LANDSCAPE){
-                recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 5));
+                recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
+                recyclerView.addItemDecoration(new SpacingItemDecoration(4, Tools.dpToPx(getContext(), 0), true));
             }else{
                 recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
+                recyclerView.addItemDecoration(new SpacingItemDecoration(3, Tools.dpToPx(getContext(), 0), true));
             }
         }else{
             recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
+            recyclerView.addItemDecoration(new SpacingItemDecoration(3, Tools.dpToPx(getContext(), 2), true));
         }
-        recyclerView.addItemDecoration(new SpacingItemDecoration(3, Tools.dpToPx(getContext(), 0), true));
         recyclerView.setHasFixedSize(true);
         recyclerView.setNestedScrollingEnabled(false);
         mAdapter = new CommonGridAdapter(getContext(), list);

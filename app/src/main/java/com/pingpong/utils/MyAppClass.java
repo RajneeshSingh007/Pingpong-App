@@ -162,7 +162,7 @@ public class MyAppClass extends Application implements Application.ActivityLifec
 
         FirebaseFirestoreSettings.Builder firebaseFirestoreSettings = new FirebaseFirestoreSettings.Builder();
         firebaseFirestoreSettings.setPersistenceEnabled(false);
-              //  .setTimestampsInSnapshotsEnabled(true);
+                //.setTimestampsInSnapshotsEnabled(true);
         firebaseFirestore  = FirebaseFirestore.getInstance();
         firebaseFirestore.setFirestoreSettings(firebaseFirestoreSettings.build());
 

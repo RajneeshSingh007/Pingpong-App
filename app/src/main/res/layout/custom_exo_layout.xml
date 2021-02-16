@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
+    android:id="@+id/controllerlayout"
     android:layoutDirection="ltr"
     android:orientation="vertical"
     tools:targetApi="28">
@@ -12,7 +13,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:paddingTop="4dp"
         android:orientation="horizontal"
         android:layout_centerInParent="true">
 
@@ -109,119 +109,172 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/bottom_layout"
+    <com.google.android.exoplayer2.ui.SubtitleView
+        android:id="@+id/subtitle"
+        android:layout_above="@+id/bottom_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="14dp"
-        android:background="@drawable/slider_img"
-        android:padding="8dp"
-        >
+        android:layout_marginBottom="@dimen/dimen_4dp"/>
+
+    <LinearLayout
+       android:layout_marginTop="4dp"
+       android:id="@+id/bottom_layout"
+       android:layout_alignParentBottom="true"
+       android:orientation="vertical"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:paddingBottom="8dp"
+       android:background="@drawable/slider_img">
+
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:gravity="center_vertical"
+           android:orientation="horizontal"
+           android:padding="8dp"
+           >
 
 
-        <ImageView
-            android:id="@+id/volumn_control_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="6dp"
-            app:srcCompat="@drawable/ic_volume_up_white"/>
+           <ImageView
+               android:id="@+id/volumn_control_iv"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:padding="6dp"
+               android:visibility="gone"
+               app:srcCompat="@drawable/ic_volume_up_white"/>
 
-        <ImageView
-            android:id="@+id/external_player_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="6dp"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_open_in_new_white"/>
+           <ImageView
+               android:id="@+id/external_player_iv"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:padding="6dp"
+               android:visibility="gone"
+               app:srcCompat="@drawable/ic_open_in_new_white"/>
 
-        <TextView
-            android:id="@+id/live_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/live"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:gravity="center_vertical"
-            android:drawableStart="@drawable/ic_fiber_manual_record_red"
-            android:drawablePadding="5dp"
-            android:visibility="gone"
-            android:layout_weight="1"
-            />
+           <TextView
+               android:id="@+id/live_tv"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="@string/live"
+               android:textColor="@color/white"
+               android:textStyle="bold"
+               android:gravity="center_vertical"
+               android:drawableStart="@drawable/ic_fiber_manual_record_red"
+               android:drawablePadding="5dp"
+               android:visibility="gone"
+               android:layout_weight="1"
+               />
 
-        <LinearLayout
-            android:id="@+id/seekbar_layout"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="26dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            >
+           <LinearLayout
+               android:id="@+id/seekbar_layout"
+               android:layout_width="0dp"
+               android:layout_weight="1"
+               android:layout_height="26dp"
+               android:gravity="center_vertical"
+               android:orientation="horizontal"
+               >
 
-            <TextView android:id="@id/exo_position"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:includeFontPadding="false"
-                android:textColor="#FFBEBEBE"/>
+               <TextView android:id="@id/exo_position"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:textSize="15sp"
+                   android:textStyle="bold"
+                   android:paddingLeft="4dp"
+                   android:paddingRight="4dp"
+                   android:includeFontPadding="false"
+                   tools:text="13:00"
+                   android:textColor="@color/white"/>
 
-            <com.google.android.exoplayer2.ui.DefaultTimeBar
-                android:id="@id/exo_progress"
-                android:layout_width="wrap_content"
-                android:layout_weight="1"
-                android:layout_height="26dp"/>
+               <com.google.android.exoplayer2.ui.DefaultTimeBar
+                   android:id="@id/exo_progress"
+                   android:layout_width="wrap_content"
+                   android:layout_weight="1"
+                   android:layout_height="26dp"/>
 
-            <TextView
-                android:id="@id/exo_duration"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:includeFontPadding="false"
-                android:textColor="#FFBEBEBE"/>
+               <TextView
+                   android:id="@id/exo_duration"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:textSize="14sp"
+                   android:textStyle="bold"
+                   android:paddingLeft="4dp"
+                   android:paddingRight="4dp"
+                   android:includeFontPadding="false"
+                   tools:text="13:00"
+                   android:textColor="@color/white"/>
 
-        </LinearLayout>
+           </LinearLayout>
 
-        <ImageView
-            android:id="@+id/img_server"
-            app:srcCompat="@drawable/ic_settings_white"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:padding="6dp"
-            android:visibility="gone"/>
+           <ImageView
+               android:id="@+id/img_server"
+               app:srcCompat="@drawable/ic_settings_white"
+               android:layout_width="35dp"
+               android:layout_height="35dp"
+               android:padding="6dp"
+               android:visibility="gone"/>
 
-        <ImageView
-            android:id="@+id/img_subtitle"
-            app:srcCompat="@drawable/ic_subtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:padding="6dp"/>
+       </LinearLayout>
 
-        <ImageView
-            android:id="@+id/aspect_ratio_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="6dp"
-            app:srcCompat="@drawable/ic_aspect_ratio_black_24dp"/>
+       <LinearLayout
+           android:id="@+id/player_config_layout"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:layout_gravity="center"
+           android:gravity="center"
+           android:layout_marginBottom="4dp">
 
-        <ImageView
-            android:id="@+id/img_full_scr"
-            app:srcCompat="@drawable/ic_full"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:padding="5dp"
-            />
+           <ImageView
+               android:id="@+id/img_subtitle"
+               app:srcCompat="@drawable/ic_subtitle"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:visibility="visible"
+               android:layout_gravity="center"
+               android:backgroundTint="@color/white"
+               android:tint="@android:color/white"
+               android:padding="6dp"
+               android:layout_marginEnd="12dp"/>
 
-    </LinearLayout>
+           <ImageView
+               android:id="@+id/audio_track"
+               app:srcCompat="@drawable/ic_audiotrack_dark"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:visibility="gone"
+               android:padding="6dp"
+               android:backgroundTint="@color/white"
+               android:tint="@android:color/white"
+               android:layout_gravity="center"
+               android:layout_marginStart="12dp"
+               android:layout_marginEnd="12dp"/>
+
+           <ImageView
+               android:id="@+id/aspect_ratio_iv"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:padding="6dp"
+               android:visibility="visible"
+               android:layout_marginStart="12dp"
+               android:layout_marginEnd="12dp"
+               android:backgroundTint="@color/white"
+               android:tint="@android:color/white"
+               app:srcCompat="@drawable/ic_aspect_ratio_black_24dp"/>
+
+           <ImageView
+               android:id="@+id/img_full_scr"
+               app:srcCompat="@drawable/ic_full"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:padding="6dp"
+               android:visibility="visible"
+               android:layout_gravity="center"
+               android:layout_marginStart="12dp"
+               android:backgroundTint="@color/white"
+               android:tint="@android:color/white"
+               />
+
+       </LinearLayout>
+   </LinearLayout>
 
     <Button
         android:layout_above="@+id/bottom_layout"
@@ -231,14 +284,13 @@
         android:text="Skip Intro"
         android:background="@drawable/skip_button"
         android:textSize="13sp"
+        android:layout_marginBottom="4dp"
         android:clickable="true"
         android:paddingStart="8dp"
-        android:layout_marginBottom="-16dp"
         android:paddingEnd="8dp"
         android:backgroundTint="@color/colorPrimaryDark"
         android:layout_alignParentRight="true"
         android:layout_marginEnd="16dp"
         android:textColor="@color/black" />
-
 
 </RelativeLayout>

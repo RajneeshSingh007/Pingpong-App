@@ -206,5 +206,7 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.Original
         }
     }
 
-
+    public int getNextPos() {
+        return nextPos;
+    }
 }

@@ -22,6 +22,7 @@
     <string name="search">Search</string>
     <string name="no_item_found">No item found</string>
     <string name="cast_n_crew">Cast</string>
+    <string name="register">Register</string>
     <string name="password">Password</string>
     <string name="save">Save</string>
     <string name="director">Director :</string>
@@ -169,6 +170,7 @@
     <!-- Example settings for Notifications -->
 
     <string name="title_activity_details">DetailsActivity</string>
+    <string name="title_activity_reply">ReplyActivity</string>
     <string name="program_guide">Program Guide</string>
     <string name="live">Live</string>
     <string name="watching_on">Watching live on</string>
@@ -218,6 +220,7 @@
     <string name="download_completed">Download Completed</string>
     <string name="watch_now">Watch Now</string>
     <string name="download">Download</string>
+    <string name="select_server">Select Server</string>
     <string name="home">Home</string>
     <string name="all_kids_videos">All Kids Videos</string>
     <string name="all_tv_series">Unlimited Shows</string>
@@ -246,6 +249,8 @@
     <string name="active_subscription">Active Subscription</string>
     <string name="no_download_server_found">No download link found</string>
     <string name="no_video_found">No video found</string>
+    <string name="failed_to_communicate">Failed to communicate with server</string>
+    <string name="no_configuration_data_found">No configuration data found.</string>
     <string name="please_login_first_to_see_favorite_list">Please login to see favorite list.</string>
     <string name="episode">Episode</string>
     <string name="recent_watched">Recent Watched</string>
@@ -256,6 +261,8 @@
     <string name="wallet_link">https://play.google.com/store/apps/details?id=com.vipswallet.shopping</string>
     <string name="ludogame_link">https://vipswallet.com/VipsLudo/</string>
     <string name="pingpong_link">https://play.google.com/store/apps/details?id=com.pingpong</string>
-    <string name="admob_appid">ca-app-pub-6228455483394109~3588934603</string>
-<!--    <string name="admob_banner_id">ca-app-pub-6228455483394109/9367040748</string>-->
+    <string name="admob_banner_id">ca-app-pub-5667475017902749/3031064230</string>
+    <string name="content_url"><![CDATA[https://storage.googleapis.com/gvabox/media/samples/stock.mp4]]></string>
+    <string name="ad_tag_url"><![CDATA[https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=]]></string>
+
 </resources>

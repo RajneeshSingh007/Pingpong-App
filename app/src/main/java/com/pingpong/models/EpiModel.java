@@ -9,6 +9,7 @@ public class EpiModel {
     private String id="";
     private String paid = "0";
     private String free_time="0";
+    private String adsUrl = "";
 
 
     public String getImageUrl() {
@@ -89,5 +90,13 @@ public class EpiModel {
 
     public void setFree_time(String free_time) {
         this.free_time = free_time;
+    }
+
+    public String getAdsUrl() {
+        return adsUrl;
+    }
+
+    public void setAdsUrl(String adsUrl) {
+        this.adsUrl = adsUrl;
     }
 }

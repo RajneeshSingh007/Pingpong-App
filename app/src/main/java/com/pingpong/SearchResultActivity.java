@@ -171,13 +171,16 @@ public class SearchResultActivity extends AppCompatActivity implements SearchAda
             tvSeriesLayout.setVisibility(View.GONE);
             coordinatorLayout.setVisibility(View.GONE);
             return;
-        }else if(query.length() < 3){
-            shimmerFrameLayout.setVisibility(View.GONE);
-            movieLayout.setVisibility(View.GONE);
-            tvSeriesLayout.setVisibility(View.GONE);
-            coordinatorLayout.setVisibility(View.GONE);
-            return;
         }
+
+//        else if(query.length() < 3){
+//            shimmerFrameLayout.setVisibility(View.GONE);
+//            movieLayout.setVisibility(View.GONE);
+//            tvSeriesLayout.setVisibility(View.GONE);
+//            coordinatorLayout.setVisibility(View.GONE);
+//            return;
+//        }
+
         //String searchType = "movie&tvseries";
         tvList.clear();
         movieList.clear();
@@ -297,6 +300,7 @@ public class SearchResultActivity extends AppCompatActivity implements SearchAda
 
     @Override
     public boolean onQueryTextChange(String s) {
-        return false;
+        getSearchData(s);
+        return true;
     }
 }

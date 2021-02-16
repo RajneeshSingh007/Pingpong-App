@@ -35,6 +35,9 @@ public class Video {
     @SerializedName("free_time")
     @Expose
     private String free_time = "0";
+    @SerializedName("ads")
+    @Expose
+    private String ads = "";
 
     public String getVideoFileId() {
         return videoFileId;
@@ -106,5 +109,13 @@ public class Video {
 
     public void setFree_time(String free_time) {
         this.free_time = free_time;
+    }
+
+    public String getAds() {
+        return ads;
+    }
+
+    public void setAds(String ads) {
+        this.ads = ads;
     }
 }

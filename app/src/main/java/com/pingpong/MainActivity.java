@@ -8,9 +8,6 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.material.navigation.NavigationView;
 
@@ -40,16 +37,20 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.play.core.appupdate.AppUpdateInfo;
@@ -71,8 +72,10 @@ import com.pingpong.models.NavigationModel;
 import com.pingpong.nav_fragments.FavoriteFragment;
 import com.pingpong.nav_fragments.MainHomeFragment;
 import com.pingpong.network.RetrofitClient;
+import com.pingpong.network.apis.HomeContentApi;
 import com.pingpong.network.apis.SubscriptionApi;
 import com.pingpong.network.model.ActiveStatus;
+import com.pingpong.network.model.Notices;
 import com.pingpong.network.model.User;
 import com.pingpong.utils.PreferenceUtils;
 import com.pingpong.utils.Constants;
@@ -136,12 +139,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
 
         // To resolve cast button visibility problem. Check Cast State when app is open.
         CastContext castContext = CastContext.getSharedInstance(this);
@@ -454,6 +451,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //                finish();
 //            }
 //        });
+
+        noticesDialog();
     }
 
     @Override
@@ -704,5 +703,55 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .clearMemory();
         }
         super.onDestroy();
+    }
+
+    private void noticesDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        ViewGroup viewGroup = findViewById(android.R.id.content);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.notice_layout, viewGroup, false);
+        ImageView cancel = dialogView.findViewById(R.id.close_iv);
+        TextView notv = dialogView.findViewById(R.id.no_tv);
+        ImageView image = dialogView.findViewById(R.id.image);
+        AlertDialog dialog =   builder.setView(dialogView).create();
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+        Retrofit retrofit = RetrofitClient.getRetrofitInstance();
+        HomeContentApi homeContentApi = retrofit.create(HomeContentApi.class);
+        Call<Notices> call = homeContentApi.getNotices(Config.API_KEY);
+        call.enqueue(new Callback<Notices>() {
+            @Override
+            public void onResponse(Call<Notices> call, Response<Notices> response) {
+                if (response.code() == 200) {
+                    Notices notices = response.body();
+                    if(notices != null){
+                        int count = 0;
+                        if(!TextUtils.isEmpty(notices.getUrl())){
+                            if (!isFinishing() && !isDestroyed()) {
+                                GlideApp.with(MainActivity.this).load(Config.BASE_URL+notices.getUrl()).into(image);
+                                image.setVisibility(View.VISIBLE);
+                                count = 1;
+                            }
+                        }
+                        if(!TextUtils.isEmpty(notices.getMessage())){
+                            notv.setText(notices.getMessage());
+                            notv.setVisibility(View.VISIBLE);
+                            count = 1;
+                        }
+                        if(count == 1){
+                            dialog.show();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Notices> call, Throwable t) {
+                // t.printStackTrace();
+            }
+        });
     }
 }

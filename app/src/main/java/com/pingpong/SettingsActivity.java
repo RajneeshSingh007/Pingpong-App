@@ -25,7 +25,7 @@ import com.pingpong.utils.Tools;
 public class SettingsActivity extends AppCompatActivity {
 
     private SwitchCompat switchCompat, switchDarkMode;
-    private TextView tvTerms,version, policy,website;
+    private TextView tvTerms,version, policy,website,dmca;
     private LinearLayout shareLayout;
     private ProgressBar progressBar;
 
@@ -70,6 +70,8 @@ public class SettingsActivity extends AppCompatActivity {
         version = findViewById(R.id.version);
         policy = findViewById(R.id.tv_privacy);
         website = findViewById(R.id.website);
+        dmca = findViewById(R.id.tv_dmca);
+
         website.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -111,8 +113,9 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent i = new Intent(SettingsActivity.this,TermsActivity.class);
                 i.putExtra("title", "Term & Condition");
-                i.putExtra("url","https://pingpongentertainment.com/term.html");
-                startActivity(i);            }
+                i.putExtra("url",Config.BASE_URL+"term.html");
+                startActivity(i);
+            }
         });
 
         policy.setOnClickListener(new View.OnClickListener() {
@@ -120,9 +123,19 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent i = new Intent(SettingsActivity.this,TermsActivity.class);
                 i.putExtra("title", "Privacy Policy");
-                i.putExtra("url","https://pingpongentertainment.com/privacypolicy.html");
+                i.putExtra("url",Config.BASE_URL+"privacypolicy.html");
                 startActivity(i);
 
+            }
+        });
+
+        dmca.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(SettingsActivity.this,TermsActivity.class);
+                i.putExtra("title", "DMCA");
+                i.putExtra("url",Config.BASE_URL+"dmca.php");
+                startActivity(i);
             }
         });
 

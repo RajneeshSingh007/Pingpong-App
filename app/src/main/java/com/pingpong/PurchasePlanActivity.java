@@ -35,6 +35,7 @@ import com.pingpong.bottomshit.PaymentBottomShitDialog;
 import com.pingpong.database.DatabaseHelper;
 import com.pingpong.network.RetrofitClient;
 import com.pingpong.network.apis.CityApi;
+import com.pingpong.network.apis.ConfigurationApi;
 import com.pingpong.network.apis.PackageApi;
 import com.pingpong.network.apis.PaymentApi;
 import com.pingpong.network.apis.PayuHashApi;
@@ -48,6 +49,7 @@ import com.pingpong.network.model.CityData;
 import com.pingpong.network.model.Package;
 import com.pingpong.network.model.PayumoneyHash;
 import com.pingpong.network.model.User;
+import com.pingpong.network.model.config.Configuration;
 import com.pingpong.network.model.config.PaymentConfig;
 import com.pingpong.payumoney.AppEnvironment;
 import com.pingpong.utils.MyAppClass;
@@ -84,7 +86,6 @@ import retrofit2.Retrofit;
 public class PurchasePlanActivity extends AppCompatActivity implements PackageAdapter.OnItemClickListener, PaymentBottomShitDialog.OnBottomShitClickListener, PaymentResultListener {
 
     private static final String TAG = PurchasePlanActivity.class.getSimpleName();
-    private static final int PAYPAL_REQUEST_CODE = 100;
     private TextView noTv;
     private ProgressBar progressBar;
     private ImageView closeIv;
@@ -182,7 +183,10 @@ public class PurchasePlanActivity extends AppCompatActivity implements PackageAd
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == PayUmoneyFlowManager.REQUEST_CODE_PAYMENT && resultCode == RESULT_OK && data != null) {
+        //Log.d(TAG, "request code " + requestCode + " resultcode " + resultCode);
+        if (requestCode == PayUmoneyFlowManager.REQUEST_CODE_PAYMENT && resultCode == RESULT_OK && data !=
+                null) {
+            // progressBar.setVisibility(View.VISIBLE);
             TransactionResponse transactionResponse = data.getParcelableExtra(PayUmoneyFlowManager
                     .INTENT_EXTRA_TRANSACTION_RESPONSE);
 
@@ -272,6 +276,7 @@ public class PurchasePlanActivity extends AppCompatActivity implements PackageAd
                                                         @Override
                                                         public void onFailure(Call<MlmLogin> call, Throwable t) {
                                                             //Log.e(TAG, "onResponse: "+t.getMessage());
+                                                            updateActiveStatus(user1.getUserId());
                                                             hideDialog();
                                                             new ToastMsg(PurchasePlanActivity.this).toastIconSuccess("You've subscribed successfully");
                                                             Intent i = new Intent(PurchasePlanActivity.this, MainActivity.class);
@@ -549,65 +554,91 @@ public class PurchasePlanActivity extends AppCompatActivity implements PackageAd
 //        }else
         if (paymentMethodName.equalsIgnoreCase(PaymentBottomShitDialog.RAZOR)){
             //razor pay
-            Checkout.preload(getApplicationContext());
-            Checkout checkout = new Checkout();
-            checkout.setKeyID("");
-            checkout.setImage(R.drawable.logo);
             Retrofit retrofit = RetrofitClient.getRetrofitInstance();
             UserDataApi api = retrofit.create(UserDataApi.class);
             Call<User> call = api.getUserData(Config.API_KEY, user.getUserId());
-            call.enqueue(new Callback<User>() {
+            ConfigurationApi configapi = retrofit.create(ConfigurationApi.class);
+            Call<Configuration> configcall = configapi.getConfigurationData(Config.API_KEY);
+            configcall.enqueue(new Callback<Configuration>() {
                 @Override
-                public void onResponse(Call<User> call, Response<User> response) {
+                public void onResponse(Call<Configuration> callx, Response<Configuration> response) {
                     if (response.code() == 200) {
-                        if (response.body() != null) {
-                            User user = response.body();
-                            if (packageItem != null && !TextUtils.isEmpty(packageItem.getName())) {
-                                JSONObject options = new JSONObject();
-                                try {
-                                    options.put("theme.color", "#6BFF1C");
-                                    options.put("name",  getString(R.string.app_name)+" Payment");
-                                    options.put("description", packageItem.getName());
-                                    //options.put("image", "https://s3.amazonaws.com/rzp-mobile/images/rzp.png");
-                                    //options.put("currency", config.getCurrency());
-                                    options.put("currency", "INR");
-                                    options.put("amount",packageItem.getPrice());
-                                    JSONObject prefill = new JSONObject();
-                                    prefill.put("email", user.getEmail());
-                                    prefill.put("contact", user.getPhone());
-                                    options.put("prefill", prefill);
-                                    checkout.open(PurchasePlanActivity.this, options);
-                                } catch(Exception e) {
-                                    Log.e(TAG, "Error in starting Razorpay Checkout", e);
-                                }
-                            }else{
-                                new ToastMsg(PurchasePlanActivity.this).toastIconError("Please, Select Package");
+                        Configuration configuration = response.body();
+                        if (configuration != null) {
+                            PaymentConfig config = configuration.getPaymentConfig();
+                            if(config != null){
+                                Checkout.preload(getApplicationContext());
+                                Checkout checkout = new Checkout();
+                                checkout.setKeyID(config.getRazorpayKeyId());
+                                //checkout.setPublicKey(config.getRazorpayKeySecret());
+                                checkout.setImage(R.mipmap.ic_launcher);
+                                call.enqueue(new Callback<User>() {
+                                    @Override
+                                    public void onResponse(Call<User> call, Response<User> response) {
+                                        if (response.code() == 200) {
+                                            if (response.body() != null) {
+                                                User user = response.body();
+                                                if (packageItem != null && !TextUtils.isEmpty(packageItem.getName())) {
+                                                    JSONObject options = new JSONObject();
+                                                    try {
+                                                        options.put("theme.color", "#6BFF1C");
+                                                        options.put("name",  getString(R.string.app_name)+" Payment");
+                                                        options.put("description", packageItem.getName());
+                                                        options.put("currency", "INR");
+                                                        options.put("amount",packageItem.getPrice()+"00");
+                                                        JSONObject prefill = new JSONObject();
+                                                        prefill.put("email", user.getEmail());
+                                                        prefill.put("contact", user.getPhone());
+                                                        options.put("prefill", prefill);
+                                                        checkout.open(PurchasePlanActivity.this, options);
+                                                    } catch(Exception e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }else{
+                                                    new ToastMsg(PurchasePlanActivity.this).toastIconError("Please, Select Package");
+                                                }
+                                            }else{
+                                                new ToastMsg(PurchasePlanActivity.this).toastIconError("Something went wrong! Please, Login & try again");
+                                                Intent intent = new Intent(PurchasePlanActivity.this, GetStarted.class);
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        }else{
+                                            new ToastMsg(PurchasePlanActivity.this).toastIconError("Something went wrong! Please, Login & try again");
+                                            Intent intent = new Intent(PurchasePlanActivity.this, GetStarted.class);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<User> call, Throwable t) {
+                                        new ToastMsg(PurchasePlanActivity.this).toastIconError("Something went wrong! Please, Login & try again");
+                                        Intent intent = new Intent(PurchasePlanActivity.this, GetStarted.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                });
                             }
                         }else{
-                            new ToastMsg(PurchasePlanActivity.this).toastIconError("Something went wrong! Please, Login & try again");
-                            Intent intent = new Intent(PurchasePlanActivity.this, GetStarted.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                            finish();
+                            new ToastMsg(PurchasePlanActivity.this).toastIconInfo("Please, Use another payment gateway");
                         }
                     }else{
-                        new ToastMsg(PurchasePlanActivity.this).toastIconError("Something went wrong! Please, Login & try again");
-                        Intent intent = new Intent(PurchasePlanActivity.this, GetStarted.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
+                        new ToastMsg(PurchasePlanActivity.this).toastIconInfo("Please, Use another payment gateway");
                     }
                 }
 
                 @Override
-                public void onFailure(Call<User> call, Throwable t) {
-
+                public void onFailure(Call<Configuration> callx, Throwable t) {
+                    new ToastMsg(PurchasePlanActivity.this).toastIconInfo("Please, Use another payment gateway");
                 }
             });
-
-
         }else{
             launchPayUMoneyFlow();
         }
@@ -702,7 +733,7 @@ public class PurchasePlanActivity extends AppCompatActivity implements PackageAd
                     }
                 });
             }else{
-                new ToastMsg(PurchasePlanActivity.this).toastIconError("Your bal is low");
+                new ToastMsg(PurchasePlanActivity.this).toastIconError("Wallet Balance is low");
             }
         }
     }
@@ -894,87 +925,90 @@ public class PurchasePlanActivity extends AppCompatActivity implements PackageAd
 
     @Override
     public void onPaymentSuccess(String razorpayPaymentID) {
-        try {
-            dialog.show();
-            String txnid = user.getUserId()+"#"+razorpayPaymentID;
-            double total = Double.parseDouble(packageItem.getPrice());
-
-            Retrofit retrofit = RetrofitClient.getRetrofitInstance();
-            PaymentApi paymentApi = retrofit.create(PaymentApi.class);
-            Call<ResponseBody> activatecall = paymentApi.savePayment(Config.API_KEY, packageItem.getPlanId(),
-                    user.getUserId(),
-                    String.valueOf(total),
-                    txnid, "");
-            Retrofit mlmInstance = RetrofitClient.getRetrofitMLMInstance();
-            WalletApi walletApi = mlmInstance.create(WalletApi.class);
-            String packageName = "PINGPONG_MEMBERSHIP_"+packageItem.getPrice();
-            Retrofit phoneRetrofit = RetrofitClient.getRetrofitInstance();
-            UserDataApi api = phoneRetrofit.create(UserDataApi.class);
-            Call<User> call = api.getUserData(Config.API_KEY, user.getUserId());
-            call.enqueue(new Callback<User>() {
-                @Override
-                public void onResponse(Call<User> call, Response<User> cllresponse) {
-                    if (cllresponse.code() == 200) {
-                        if (cllresponse.body() != null) {
-                            User user1 = cllresponse.body();
-                            Call<MlmLogin> balCall = walletApi.purchaseMemberShip(Config.MLM_AUTH,user1.getPhone(),user1.getPassword(), Config.PARTER_ID, "PG",packageName);
-                            //Call<MlmLogin> balCall = walletApi.purchaseMemberShip(Config.MLM_AUTH, "9923290044", "Xyz_123",Config.PARTER_ID, "PG",packageName);
-                            activatecall.enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                    if (response.code() == 200) {
-                                        updateActiveStatus(user1.getUserId());
-                                        balCall.enqueue(new Callback<MlmLogin>() {
-                                            @Override
-                                            public void onResponse(Call<MlmLogin> call, Response<MlmLogin> ctresponse) {
-                                                if(ctresponse.code() == 200){
-                                                    storeTxLog(user1.getUserId(), ctresponse.body().getStatus() +"#"+ctresponse.body().getRemarks(),"PG");
-                                                    //Log.e(TAG, "onResponse: "+ctresponse.body().getStatus()+" "+ctresponse.body().getRemarks());
+        if(!TextUtils.isEmpty(razorpayPaymentID)){
+            try {
+                if(dialog != null) {
+                    dialog.show();
+                }
+                String txnid = user.getUserId()+"#"+razorpayPaymentID;
+                double total = Double.parseDouble(packageItem.getPrice());
+                Retrofit retrofit = RetrofitClient.getRetrofitInstance();
+                PaymentApi paymentApi = retrofit.create(PaymentApi.class);
+                Call<ResponseBody> activatecall = paymentApi.savePayment(Config.API_KEY, packageItem.getPlanId(),
+                        user.getUserId(),
+                        String.valueOf(total),
+                        txnid, "RPay");
+                Retrofit mlmInstance = RetrofitClient.getRetrofitMLMInstance();
+                WalletApi walletApi = mlmInstance.create(WalletApi.class);
+                String packageName = "PINGPONG_MEMBERSHIP_"+packageItem.getPrice();
+                Retrofit phoneRetrofit = RetrofitClient.getRetrofitInstance();
+                UserDataApi api = phoneRetrofit.create(UserDataApi.class);
+                Call<User> call = api.getUserData(Config.API_KEY, user.getUserId());
+                call.enqueue(new Callback<User>() {
+                    @Override
+                    public void onResponse(Call<User> call, Response<User> cllresponse) {
+                        if (cllresponse.code() == 200) {
+                            if (cllresponse.body() != null) {
+                                User user1 = cllresponse.body();
+                                Call<MlmLogin> balCall = walletApi.purchaseMemberShip(Config.MLM_AUTH,user1.getPhone(),user1.getPassword(), Config.PARTER_ID, "PG",packageName);
+                                activatecall.enqueue(new Callback<ResponseBody>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        if (response.code() == 200) {
+                                            updateActiveStatus(user1.getUserId());
+                                            balCall.enqueue(new Callback<MlmLogin>() {
+                                                @Override
+                                                public void onResponse(Call<MlmLogin> call, Response<MlmLogin> ctresponse) {
+                                                    if(ctresponse.code() == 200){
+                                                        storeTxLog(user1.getUserId(), ctresponse.body().getStatus() +"#"+ctresponse.body().getRemarks(),"PG");
+                                                        //Log.e(TAG, "onResponse: "+ctresponse.body().getStatus()+" "+ctresponse.body().getRemarks());
+                                                    }
+                                                    hideDialog();
+                                                    new ToastMsg(PurchasePlanActivity.this).toastIconSuccess("You've subscribed successfully");
+                                                    Intent i = new Intent(PurchasePlanActivity.this, MainActivity.class);
+                                                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                    startActivity(i);
+                                                    finish();
                                                 }
-                                                hideDialog();
-                                                new ToastMsg(PurchasePlanActivity.this).toastIconSuccess("You've subscribed successfully");
-                                                Intent i = new Intent(PurchasePlanActivity.this, MainActivity.class);
-                                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                startActivity(i);
-                                                finish();
-                                            }
 
-                                            @Override
-                                            public void onFailure(Call<MlmLogin> call, Throwable t) {
-                                                //Log.e(TAG, "onResponse: "+t.getMessage());
-                                                hideDialog();
-                                                new ToastMsg(PurchasePlanActivity.this).toastIconSuccess("You've subscribed successfully");
-                                                Intent i = new Intent(PurchasePlanActivity.this, MainActivity.class);
-                                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                startActivity(i);
-                                                finish();
-                                            }
-                                        });
-                                    } else {
+                                                @Override
+                                                public void onFailure(Call<MlmLogin> call, Throwable t) {
+                                                    //Log.e(TAG, "onResponse: "+t.getMessage());
+                                                    updateActiveStatus(user1.getUserId());
+                                                    hideDialog();
+                                                    new ToastMsg(PurchasePlanActivity.this).toastIconSuccess("You've subscribed successfully");
+                                                    Intent i = new Intent(PurchasePlanActivity.this, MainActivity.class);
+                                                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                    startActivity(i);
+                                                    finish();
+                                                }
+                                            });
+                                        } else {
+                                            hideDialog();
+                                            new ToastMsg(PurchasePlanActivity.this).toastIconError(getString(R.string.something_went_wrong));
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
                                         hideDialog();
                                         new ToastMsg(PurchasePlanActivity.this).toastIconError(getString(R.string.something_went_wrong));
                                     }
-                                }
-
-                                @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                    hideDialog();
-                                    new ToastMsg(PurchasePlanActivity.this).toastIconError(getString(R.string.something_went_wrong));
-                                }
-                            });
+                                });
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<User> call, Throwable t) {
-                    hideDialog();
-                }
-            });
-        } catch (Exception e) {
-            new ToastMsg(PurchasePlanActivity.this).toastIconError("Something went wrong!, Please, try again after sometime");
+                    @Override
+                    public void onFailure(Call<User> call, Throwable t) {
+                        hideDialog();
+                    }
+                });
+            } catch (Exception e) {
+                new ToastMsg(PurchasePlanActivity.this).toastIconError("Something went wrong!, Please, try again after sometime");
+            }
         }
     }
 

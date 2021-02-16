@@ -27,10 +27,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitClient {
 
     public static final String API_URL_EXTENSION = "/v100/";
-    //copy your api username and password from php admin dashboard & paste below
-    public static final String API_USER_NAME = "";
-    public static final String API_PASSWORD = "";
-
     private static Retrofit retrofit;
     private static Retrofit mlmRetrofit;
     private static Retrofit otherRetrofit;
@@ -41,7 +37,7 @@ public class RetrofitClient {
 
         OkHttpClient.Builder client = new OkHttpClient.Builder()
                         .readTimeout(40, TimeUnit.SECONDS)
-               // .addInterceptor(logging)
+                //.addInterceptor(logging)
                 .connectTimeout(40, TimeUnit.SECONDS);
         //if(addCustom){
           //client.addInterceptor(new BasicAuthInterceptor(API_USER_NAME, API_PASSWORD));
@@ -86,7 +82,7 @@ public class RetrofitClient {
 
         OkHttpClient.Builder client = new OkHttpClient.Builder()
                 .readTimeout(40, TimeUnit.SECONDS)
-                //.addInterceptor(logging)
+                 //.addInterceptor(logging)
                 .connectTimeout(40, TimeUnit.SECONDS);
         //if(addCustom){
         //client.addInterceptor(new BasicAuthInterceptor(API_USER_NAME, API_PASSWORD));

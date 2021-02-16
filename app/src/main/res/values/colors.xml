@@ -61,4 +61,7 @@
     //bottom navigation for light mood
     <color name="textcolor">#E0E0E0</color>
     <color name="secondaycolor">#FFA90A</color>
+    <color name="greyish">#cc000000</color>
+    <color name="splashbg">#11161e</color>
+
 </resources>

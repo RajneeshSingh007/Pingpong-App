@@ -52,6 +52,7 @@ public class AppGlideModule extends com.bumptech.glide.module.AppGlideModule {
                 //.centerCrop()
                // .encodeFormat(Bitmap.CompressFormat.PNG)
                 //.encodeQuality(100)
+               // .centerCrop()
                 .onlyRetrieveFromCache(false)
                 .error(R.drawable.album_art_placeholder_large)
                 .placeholder(R.drawable.album_art_placeholder_large)

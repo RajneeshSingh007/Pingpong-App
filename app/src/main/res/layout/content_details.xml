@@ -164,10 +164,10 @@
         android:layout_below="@+id/shimmer_view_container"
         android:clickable="true"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="275dp"
         android:focusable="true"
         android:visibility="gone"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <ImageView
             android:id="@+id/radioPlayImage"
@@ -175,7 +175,7 @@
             android:background="@color/black"
             android:clickable="false"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="275dp"
             android:focusable="true"
             android:visibility="gone"
             tools:visibility="visible"
@@ -203,11 +203,6 @@
                 tools:visibility="visible">
 
             </com.google.android.exoplayer2.ui.PlayerControlView>
-
-            <com.google.android.exoplayer2.ui.SubtitleView
-                android:id="@+id/subtitle"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
 
         </FrameLayout>
 
@@ -286,7 +281,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/black"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
@@ -1132,6 +1127,14 @@
 
 
                     </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/adsview"
+                        android:layout_width="match_parent"
+                        android:visibility="gone"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_height="wrap_content"/>
                     <View
                         android:layout_marginTop="5dp"
                         android:background="@color/grey_transparent"

@@ -38,6 +38,9 @@ public class Episode {
     @SerializedName("free_time")
     @Expose
     private String free_time = "0";
+    @SerializedName("ads")
+    @Expose
+    private String ads = "";
 
     public String getEpisodesId() {
         return episodesId;
@@ -109,5 +112,21 @@ public class Episode {
 
     public String getFree_time() {
         return free_time;
+    }
+
+    public void setPaid(String paid) {
+        this.paid = paid;
+    }
+
+    public void setFree_time(String free_time) {
+        this.free_time = free_time;
+    }
+
+    public String getAds() {
+        return ads;
+    }
+
+    public void setAds(String ads) {
+        this.ads = ads;
     }
 }

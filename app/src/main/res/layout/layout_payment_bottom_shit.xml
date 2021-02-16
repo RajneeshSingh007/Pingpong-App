@@ -17,8 +17,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:gravity="center"
-            android:textColor="@color/textcolor"
-            android:textSize="16sp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="17sp"
             android:textStyle="bold"
             android:paddingVertical="10dp"
             android:text="@string/please_select_your_payment_method" />
@@ -47,7 +47,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    app:cardBackgroundColor="@color/colorPrimaryDark"
+                    app:cardBackgroundColor="#7E57C2"
                     app:cardCornerRadius="6dp"
                     android:clickable="true"
                     android:focusable="true"
@@ -60,23 +60,24 @@
 
                         <FrameLayout
                             android:layout_width="match_parent"
-                            android:layout_height="124dp"
+                            android:layout_height="172dp"
                             android:background="@color/white">
 
                             <ImageView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
-                                app:srcCompat="@drawable/razorpay_128" />
+                                app:srcCompat="@drawable/razpay" />
 
                         </FrameLayout>
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:text="Pay Now"
+                            android:text="Pay Now (Razorpay)"
                             android:paddingVertical="16dp"
-                            android:textColor="@color/black"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
                             android:textSize="17sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
@@ -106,7 +107,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    app:cardBackgroundColor="@color/colorPrimaryDark"
+                    app:cardBackgroundColor="#03A9F4"
                     app:cardCornerRadius="6dp"
                     android:clickable="true"
                     android:focusable="true"
@@ -115,27 +116,29 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:background="#03A9F4"
                         android:orientation="vertical">
 
                         <FrameLayout
                             android:layout_width="match_parent"
-                            android:layout_height="124dp"
-                            android:background="@color/black">
+                            android:layout_height="148dp"
+                            android:background="@color/white">
 
                             <ImageView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
-                                app:srcCompat="@drawable/payumoney" />
+                                app:srcCompat="@drawable/ccpay" />
 
                         </FrameLayout>
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:text="Pay Now"
+                            android:text="Pay Now (PayU)"
                             android:paddingVertical="16dp"
-                            android:textColor="@color/black"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
                             android:textSize="17sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
@@ -164,27 +167,28 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    app:cardBackgroundColor="@color/secondaycolor"
+                    app:cardBackgroundColor="#4CAF50"
                     app:cardCornerRadius="6dp"
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="?android:selectableItemBackground" >
 
                     <LinearLayout
+                        android:background="#4CAF50"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="vertical">
 
                         <FrameLayout
                             android:layout_width="match_parent"
-                            android:layout_height="124dp"
+                            android:layout_height="148dp"
                             android:background="@color/white">
 
                             <ImageView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
-                                app:srcCompat="@drawable/vips" />
+                                app:srcCompat="@drawable/walletpay" />
 
                         </FrameLayout>
                         <TextView
@@ -192,9 +196,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:text="Wallet"
+                            android:text="Vips Wallet"
                             android:paddingVertical="16dp"
-                            android:textColor="@color/black"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
                             android:textSize="17sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>

@@ -86,7 +86,6 @@ public class PaymentBottomShitDialog extends BottomSheetDialogFragment {
         Retrofit retrofit = RetrofitClient.getRetrofitMLMInstance();
         WalletApi walletApi = retrofit.create(WalletApi.class);
         User user = PreferenceUtils.getUser(getContext());
-        //Call<MlmLogin> balCall = walletApi.getBalance(Config.MLM_AUTH,"9923290044", "Xyz_123", Config.PARTER_ID);
         Retrofit phoneRetrofit = RetrofitClient.getRetrofitInstance();
         UserDataApi api = phoneRetrofit.create(UserDataApi.class);
         Call<User> call = api.getUserData(Config.API_KEY, user.getUserId());
@@ -108,7 +107,7 @@ public class PaymentBottomShitDialog extends BottomSheetDialogFragment {
                                             Data data = mlmLogin.getData();
                                             walletbtn.setVisibility(View.VISIBLE);
                                             walletBal = Double.parseDouble(data.getBalance());
-                                            walletText.setText("Wallet (Available Balance "+data.getBalance()+"₹)");
+                                            walletText.setText("Vips Wallet (Available Balance "+data.getBalance()+"₹)");
                                         }else{
                                             walletbtn.setVisibility(View.GONE);
                                         }
